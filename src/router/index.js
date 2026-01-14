@@ -9,7 +9,7 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/reading',
+    path: '/reading/:table',
     name: 'ReadingView',
     component: ReadingView
   }

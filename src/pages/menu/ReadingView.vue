@@ -3,7 +3,7 @@
     <!-- Header -->
     <Header :icon="icon" :title="title" :subtitle="subtitle">
       <template #back-button>
-        <div class="mb-6">
+        <div class="mb-6 flex w-full justify-between ">
           <router-link to="/">
             <Button text="Kembali">
               <template #icon>
@@ -14,6 +14,25 @@
               </template>
             </Button>
           </router-link>
+          <div class="flex gap-3">
+            <Button text="Cetak" @click="printData">
+              <template #icon>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+              </template>
+            </Button>
+            <Button text="Download Excel" @click="downloadExcel">
+              <template #icon>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </template>
+            </Button>
+          </div>
+
         </div>
       </template>
     </Header>
@@ -32,7 +51,7 @@
       <!-- Zikir List -->
       <div v-else class="space-y-6">
         <MainCard v-for="item in zikirData" :key="item.no" :no="item.no" :arab="item.arab" :translation="item.terjemah"
-          :is-expanded="expandedCards.has(item.no)" @toggle="toggleCard" />
+          :is-expanded="expandedCards.has(item.no)" :arab-size="arabSize" :translation-size="translationSize" @toggle="toggleCard" />
       </div>
 
       <!-- Empty State -->
@@ -49,6 +68,16 @@
       <!-- Menu Items (appear when FAB is clicked) -->
       <transition name="menu-fade">
         <div v-if="showMenu" class="absolute bottom-16 right-0 flex flex-col items-end gap-3 mb-2">
+          <!-- Settings -->
+          <ActionButton text="Pengaturan Teks" aria-label="Settings" @click="toggleSettings">
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </template>
+          </ActionButton>
+
           <!-- Auto Scroll -->
           <ActionButton :text="isAutoScrolling ? 'Stop Auto Scroll' : 'Auto Scroll'" aria-label="Auto scroll"
             @click="toggleAutoScroll">
@@ -97,12 +126,47 @@
         </svg>
       </button>
     </div>
+
+    <!-- Settings Modal -->
+    <div v-if="showSettingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" @click="showSettingsModal = false">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-4 max-w-sm w-full" @click.stop>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pengaturan Teks</h3>
+        
+        <!-- Arabic Size -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ukuran Teks Arab</label>
+          <select v-model="arabSize" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <option value="text-2xl sm:text-4xl">Kecil</option>
+            <option value="text-3xl sm:text-5xl">Sedang</option>
+            <option value="text-4xl sm:text-6xl">Besar</option>
+            <option value="text-5xl sm:text-7xl">Sangat Besar</option>
+          </select>
+        </div>
+        
+        <!-- Translation Size -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ukuran Teks Terjemah</label>
+          <select v-model="translationSize" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <option value="text-sm sm:text-base">Kecil</option>
+            <option value="text-base sm:text-lg">Sedang</option>
+            <option value="text-lg sm:text-xl">Besar</option>
+            <option value="text-xl sm:text-2xl">Sangat Besar</option>
+          </select>
+        </div>
+        
+        <button @click="showSettingsModal = false" class="w-full px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
+          Tutup
+        </button>
+      </div>
+    </div>
   </PageContainer>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, defineProps } from 'vue';
+import { useRoute } from 'vue-router';
 import { PageContainer, Header, Button, ActionButton, MainCard } from '@/components';
+import * as XLSX from 'xlsx';
 
 const props = defineProps({
   data: {
@@ -119,6 +183,8 @@ const props = defineProps({
   }
 });
 
+const route = useRoute();
+
 // State
 const zikirData = ref([]);
 const title = ref('Reading View');
@@ -130,6 +196,9 @@ const showMenu = ref(false);
 const isFullscreen = ref(false);
 const isAutoScrolling = ref(false);
 const isLoading = ref(false);
+const arabSize = ref('text-3xl sm:text-5xl');
+const translationSize = ref('text-base sm:text-lg');
+const showSettingsModal = ref(false);
 let autoScrollInterval = null;
 
 // Toggle card expansion
@@ -143,10 +212,17 @@ const toggleCard = (no) => {
   expandedCards.value = new Set(expandedCards.value);
 };
 
+// Toggle settings modal
+const toggleSettings = () => {
+  showSettingsModal.value = !showSettingsModal.value;
+  showMenu.value = false;
+};
+
 // Toggle menu
 const toggleMenu = () => {
+  console.log('toggleMenu called');
   showMenu.value = !showMenu.value;
-};
+};;
 
 // Scroll to top function
 const scrollToTop = () => {
@@ -208,6 +284,52 @@ const toggleAutoScroll = () => {
   showMenu.value = false;
 };
 
+// Print data
+const printData = () => {
+  const printWindow = window.open('', '_blank');
+  const html = `
+    <html>
+      <head>
+        <title>${title.value}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .item { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+          .arab { font-size: 24px; direction: rtl; text-align: right; }
+          .translation { font-size: 16px; margin-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <h1>${title.value}</h1>
+        <p>${subtitle.value}</p>
+        ${zikirData.value.map(item => `
+          <div class="item">
+            <div class="arab">${item.arab}</div>
+            <div class="translation">${item.terjemah}</div>
+          </div>
+        `).join('')}
+      </body>
+    </html>
+  `;
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.print();
+  showMenu.value = false;
+};
+
+// Download Excel
+const downloadExcel = () => {
+  const data = zikirData.value.map(item => ({
+    No: item.no,
+    Arab: item.arab,
+    Terjemah: item.terjemah
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Zikir');
+  XLSX.writeFile(wb, `${title.value}.xlsx`);
+  showMenu.value = false;
+};
+
 // Handle scroll event to show/hide scroll to top button
 const handleScroll = () => {
   showScrollTop.value = window.scrollY > 300;
@@ -257,32 +379,9 @@ const fetchData = async (tableKey) => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  // Ambil data dari localStorage
-  const storedData = localStorage.getItem('readingData');
-  const storedTitle = localStorage.getItem('readingTitle');
-  const storedSubtitle = localStorage.getItem('readingSubtitle');
-  const storedIcon = localStorage.getItem('readingIcon');
-  const storedSelectedTable = localStorage.getItem('selectedTable');
-
-  if (storedData) {
-    zikirData.value = JSON.parse(storedData);
-    localStorage.removeItem('readingData'); // Hapus setelah digunakan
-  } else if (storedSelectedTable) {
-    // Jika tidak ada data tapi ada selectedTable, fetch ulang
-    await fetchData(storedSelectedTable);
-  }
-
-  if (storedTitle) {
-    title.value = storedTitle;
-    localStorage.removeItem('readingTitle');
-  }
-  if (storedSubtitle) {
-    subtitle.value = storedSubtitle;
-    localStorage.removeItem('readingSubtitle');
-  }
-  if (storedIcon) {
-    icon.value = storedIcon;
-    localStorage.removeItem('readingIcon');
+  const table = route.params.table;
+  if (table) {
+    await fetchData(table.replace(/-/g, '_'));
   }
 
   window.addEventListener('scroll', handleScroll);

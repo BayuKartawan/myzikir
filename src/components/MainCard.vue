@@ -13,7 +13,7 @@
         <div class="relative p-6 sm:p-8">
             <!-- Arabic Text -->
             <div :class="{ 'mb-6 sm:mb-8': isExpanded }">
-                <p class="text-right text-3xl sm:text-5xl leading-loose text-gray-800 dark:text-gray-100 font-hafs">
+                <p :class="['text-right leading-loose text-gray-800 dark:text-gray-100 font-hafs', arabSize]">
                     {{ arab }}
                 </p>
             </div>
@@ -39,7 +39,7 @@
                             <h3 class="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
                                 Terjemahan
                             </h3>
-                            <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                            <p :class="['text-gray-700 dark:text-gray-300 leading-relaxed', translationSize]">
                                 {{ translation }}
                             </p>
                         </div>
@@ -88,6 +88,14 @@ defineProps({
     isExpanded: {
         type: Boolean,
         default: false,
+    },
+    arabSize: {
+        type: String,
+        default: 'text-3xl sm:text-5xl',
+    },
+    translationSize: {
+        type: String,
+        default: 'text-base sm:text-lg',
     },
 });
 

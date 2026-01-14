@@ -7,7 +7,7 @@
     <slot name="icon">
       <component :is="icon" v-if="icon" class="w-4 h-4 transition-transform group-hover:-translate-x-1" />
     </slot>
-    <span>{{ text }}</span>
+    <span class="hidden md:inline">{{ text }}</span>
   </button>
 </template>
 
