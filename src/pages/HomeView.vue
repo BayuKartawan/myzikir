@@ -17,78 +17,25 @@
       </div>
 
       <!-- Menu Grid -->
-      <div class="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-        <!-- Zikir Setelah Shalat -->
-        <router-link to="/dzikir-after-shalat"
-          class="group relative overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-gray-100 dark:border-gray-700/50 transition-all duration-500 hover:-translate-y-2">
-          <!-- Decorative gradient -->
-          <div
-            class="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/5 dark:to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          </div>
-
-          <div class="relative">
-            <!-- Icon -->
-            <div
-              class="flex items-center justify-center w-14 h-14 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-              <span class="text-3xl">📿</span>
-            </div>
-
-            <!-- Content -->
-            <div class="space-y-2">
-              <h2
-                class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
-                Zikir Setelah Shalat
-              </h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Bacaan zikir setelah melaksanakan shalat fardhu
-              </p>
-            </div>
-
-            <!-- Arrow indicator -->
-            <div
-              class="flex items-center mt-6 text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-0 group-hover:translate-x-2">
-              <span class="text-sm font-medium">Buka</span>
-              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-        </router-link>
-
-        <!-- Placeholder untuk menu tambahan -->
-        <div
-          class="group relative overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700/50 opacity-50">
-          <div class="relative">
-            <div class="flex items-center justify-center w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-6">
-              <span class="text-3xl">✨</span>
-            </div>
-            <div class="space-y-2">
-              <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                Segera Hadir
-              </h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Menu dzikir lainnya akan ditambahkan
-              </p>
-            </div>
+      <div class="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto relative">
+        <!-- Loading Overlay -->
+        <div v-if="isLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">Memuat data...</p>
           </div>
         </div>
 
-        <div
-          class="group relative overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700/50 opacity-50">
-          <div class="relative">
-            <div class="flex items-center justify-center w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-6">
-              <span class="text-3xl">🌙</span>
-            </div>
-            <div class="space-y-2">
-              <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                Segera Hadir
-              </h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Menu dzikir lainnya akan ditambahkan
-              </p>
-            </div>
-          </div>
-        </div>
+        <MenuCard
+          v-for="table in availableTables"
+          :key="table.key"
+          :label="table.label"
+          :description="table.description"
+          :icon="table.icon"
+          :is-placeholder="table.isPlaceholder"
+          :is-loading="false"
+          @click="handleCardClick(table)"
+        />
       </div>
     </div>
 
@@ -104,7 +51,69 @@
 </template>
 
 <script setup>
-// Component logic dapat ditambahkan di sini jika diperlukan
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { MenuCard } from '@/components';
+
+const router = useRouter();
+
+const selectedTable = ref('zikir_setelah_shalat');
+const availableTables = ref([
+  { key: 'zikir_setelah_shalat', label: 'Zikir Setelah Shalat', description: 'Bacaan zikir setelah melaksanakan shalat fardhu', icon: '📿', isPlaceholder: false },
+  { key: 'doa_setelah_shalat', label: 'Doa Setelah Shalat', description: 'Bacaan doa setelah melaksanakan shalat fardhu', icon: '🤲', isPlaceholder: false },
+  { key: 'placeholder1', label: 'Segera Hadir', description: 'Menu dzikir lainnya akan ditambahkan', icon: '✨', isPlaceholder: true },
+]);
+const isLoading = ref(false);
+const error = ref(null);
+
+const handleCardClick = async (table) => {
+  if (table.isPlaceholder) return;
+
+  isLoading.value = true;
+  selectedTable.value = table.key;
+
+  try {
+    await fetchData();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const fetchData = async () => {
+  error.value = null;
+
+  try {
+    const response = await fetch(import.meta.env.VITE_API_URL);
+
+    if (!response.ok) {
+      throw new Error('Gagal mengambil data zikir');
+    }
+
+    const result = await response.json();
+
+    if (result.status === 'success' && result.data[selectedTable.value]) {
+      const data = result.data[selectedTable.value];
+      const selectedTableInfo = availableTables.value.find(t => t.key === selectedTable.value);
+      const title = selectedTableInfo?.label || 'Reading View';
+      const icon = selectedTableInfo?.icon || '📿';
+      const subtitle = selectedTableInfo?.description || 'Ketuk kartu untuk melihat terjemahan';
+
+      // Simpan data ke localStorage
+      localStorage.setItem('readingData', JSON.stringify(data));
+      localStorage.setItem('readingTitle', title);
+      localStorage.setItem('readingSubtitle', subtitle);
+      localStorage.setItem('readingIcon', icon);
+      localStorage.setItem('selectedTable', selectedTable.value);
+
+      router.push({ name: 'ReadingView' });
+    } else {
+      throw new Error('Format data tidak sesuai atau tabel tidak ditemukan');
+    }
+  } catch (err) {
+    error.value = err.message || 'Terjadi kesalahan saat memuat data';
+    console.error('Error fetching zikir:', err);
+  }
+};
 </script>
 
 <style scoped>

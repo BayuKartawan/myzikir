@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../pages/HomeView.vue'
-import DzikirAfterShalat from '../pages/menu/DzikirAfterShalat.vue'
+import ReadingView from '../pages/menu/ReadingView.vue'
 
 const routes = [
   {
@@ -9,9 +9,9 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/dzikir-after-shalat',
-    name: 'DzikirAfterShalat',
-    component: DzikirAfterShalat
+    path: '/reading',
+    name: 'ReadingView',
+    component: ReadingView
   }
 ]
 
