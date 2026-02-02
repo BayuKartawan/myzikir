@@ -4,7 +4,7 @@
     <Header :icon="icon" :title="title" :subtitle="subtitle">
       <template #back-button>
         <div class="mb-6 flex w-full justify-between ">
-          <router-link to="/">
+          <NuxtLink to="/">
             <Button text="Kembali">
               <template #icon>
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor"
@@ -13,7 +13,7 @@
                 </svg>
               </template>
             </Button>
-          </router-link>
+          </NuxtLink>
           <div class="flex gap-3">
             <Button text="Cetak" @click="printData">
               <template #icon>
@@ -57,7 +57,7 @@
       <!-- Empty State -->
       <div v-if="!isLoading && zikirData.length === 0" class="text-center py-20">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-4">
-          <span class="text-5xl">📿</span>
+          <Icon name="lucide:search" class="text-5xl text-gray-400" />
         </div>
         <p class="text-base text-gray-500 dark:text-gray-400">Tidak ada data zikir tersedia.</p>
       </div>
@@ -163,9 +163,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, defineProps } from 'vue';
-import { useRoute } from 'vue-router';
-import { PageContainer, Header, Button, ActionButton, MainCard } from '@/components';
+import { availableTables } from '~/utils/menu';
 import * as XLSX from 'xlsx';
 
 const props = defineProps({
@@ -189,7 +187,7 @@ const route = useRoute();
 const zikirData = ref([]);
 const title = ref('Reading View');
 const subtitle = ref('Ketuk kartu untuk melihat terjemahan');
-const icon = ref('📿');
+const icon = ref('lucide:book-marked');
 const expandedCards = ref(new Set());
 const showScrollTop = ref(false);
 const showMenu = ref(false);
@@ -200,6 +198,14 @@ const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
 const showSettingsModal = ref(false);
 let autoScrollInterval = null;
+
+// Set Dynamic Page Title
+useHead({
+  title: () => `${title.value} - MyZikir`,
+  meta: [
+    { name: 'description', content: () => subtitle.value }
+  ]
+})
 
 // Toggle card expansion
 const toggleCard = (no) => {
@@ -344,7 +350,7 @@ const handleFullscreenChange = () => {
 const fetchData = async (tableKey) => {
   isLoading.value = true;
   try {
-    const response = await fetch(import.meta.env.VITE_API_URL);
+    const response = await fetch(`/api/zikir?table=${tableKey}`);
 
     if (!response.ok) {
       throw new Error('Gagal mengambil data zikir');
@@ -352,16 +358,12 @@ const fetchData = async (tableKey) => {
 
     const result = await response.json();
 
-    if (result.status === 'success' && result.data[tableKey]) {
-      const data = result.data[tableKey];
+    if (result.status === 'success') {
+      const data = result.data;
       zikirData.value = data;
 
-      // Set title and subtitle based on table
-      const availableTables = [
-        { key: 'zikir_setelah_shalat', label: 'Zikir Setelah Shalat', description: 'Bacaan zikir setelah melaksanakan shalat fardhu', icon: '📿' },
-        { key: 'doa_setelah_shalat', label: 'Doa Setelah Shalat', description: 'Bacaan doa setelah melaksanakan shalat fardhu', icon: '🙏' },
-      ];
-      const selectedTableInfo = availableTables.find(t => t.key === tableKey);
+      // Set title and subtitle dynamic from menu config
+      const selectedTableInfo = availableTables.find(t => t.apiKey === tableKey);
       if (selectedTableInfo) {
         title.value = selectedTableInfo.label;
         subtitle.value = selectedTableInfo.description;

@@ -6,7 +6,7 @@
       <div class="text-center space-y-3">
         <!-- Icon -->
         <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl mb-2">
-          <span class="text-3xl sm:text-4xl">{{ icon }}</span>
+          <Icon :name="icon" class="text-3xl sm:text-4xl text-emerald-600 dark:text-emerald-400" />
         </div>
 
         <!-- Title -->

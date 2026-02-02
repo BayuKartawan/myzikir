@@ -6,7 +6,7 @@
       <div class="text-center space-y-3 mb-12 sm:mb-16">
         <div
           class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl mb-4">
-          <span class="text-4xl sm:text-5xl">🤲</span>
+          <Icon name="lucide:sparkles" class="text-4xl sm:text-5xl text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
           Menu Al-Adzkar
@@ -43,17 +43,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { MenuCard } from '@/components';
+import { availableTables as menuList } from '~/utils/menu';
 
 const router = useRouter();
 
+useHead({
+  title: 'Menu Al-Adzkar - MyZikir',
+  meta: [
+    { name: 'description', content: 'Daftar menu dzikir dan doa harian' }
+  ]
+})
+
 const selectedTable = ref('zikir_setelah_shalat');
 const availableTables = ref([
-  { key: 'zikir-setelah-shalat', label: 'Zikir Setelah Shalat', description: 'Bacaan zikir setelah melaksanakan shalat fardhu', icon: '📿', isPlaceholder: false },
-  { key: 'doa-setelah-shalat', label: 'Doa Setelah Shalat', description: 'Bacaan doa setelah melaksanakan shalat fardhu', icon: '🤲', isPlaceholder: false },
-  { key: 'placeholder1', label: 'Segera Hadir', description: 'Menu dzikir lainnya akan ditambahkan', icon: '✨', isPlaceholder: true },
+  ...menuList,
+  { key: 'placeholder1', label: 'Segera Hadir', description: 'Menu dzikir lainnya akan ditambahkan', icon: 'lucide:plus', isPlaceholder: true },
 ]);
 
 const handleCardClick = (table) => {

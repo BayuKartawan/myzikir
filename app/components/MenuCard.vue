@@ -16,7 +16,7 @@
         class="flex items-center justify-center w-14 h-14 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
         :class="{ 'bg-gray-200 dark:bg-gray-700': isPlaceholder }"
       >
-        <span v-if="!isLoading" class="text-3xl">{{ icon }}</span>
+        <Icon v-if="!isLoading" :name="icon" class="text-3xl text-emerald-600 dark:text-emerald-400" />
         <div v-else class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
       </div>
 
@@ -49,7 +49,6 @@
 
 <script setup>
 defineProps({
-  key: String,
   label: String,
   description: String,
   icon: String,

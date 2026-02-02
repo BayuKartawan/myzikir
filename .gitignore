@@ -33,4 +33,9 @@ coverage
 /cypress/screenshots/
 
 # Vitest
-__screenshots__/
+# Nuxt
+.output
+.nuxt
+.nitro
+.cache
+.env
