@@ -13,6 +13,13 @@ export const availableTables = [
         description: 'Bacaan doa setelah melaksanakan shalat fardhu',
         icon: 'lucide:sun'
     },
+    {
+        key: 'Tahlil',
+        apiKey: 'Tahlil',
+        label: 'Tahlil',
+        description: 'Bacaan tahlil',
+        icon: 'lucide:book-open'
+    },
     // Nanti jika ada menu baru, cukup tambah satu objek di bawah ini:
     // { 
     //   key: 'zikir-pagi', 

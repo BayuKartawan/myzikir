@@ -50,8 +50,22 @@
 
       <!-- Zikir List -->
       <div v-else class="space-y-6">
-        <MainCard v-for="item in zikirData" :key="item.no" :no="item.no" :arab="item.arab" :translation="item.terjemah"
-          :is-expanded="expandedCards.has(item.no)" :arab-size="arabSize" :translation-size="translationSize" @toggle="toggleCard" />
+        <template v-for="(item, index) in zikirData" :key="item.no">
+          <!-- Sub-menu Header -->
+          <div v-if="item.sub_menu" :id="'section-' + encodeURIComponent(item.sub_menu)" class="pt-8 pb-4 animate-fadeIn">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="h-8 w-1.5 bg-emerald-500 rounded-full"></div>
+              <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
+                {{ item.sub_menu }}
+              </h2>
+            </div>
+            <div class="h-px w-full bg-linear-to-r from-emerald-500/20 to-transparent"></div>
+          </div>
+
+          <MainCard :id="'card-' + item.no" :no="item.no" :arab="item.arab" :translation="item.terjemah"
+            :is-expanded="expandedCards.has(item.no)" :arab-size="arabSize" :translation-size="translationSize"
+            @toggle="toggleCard" />
+        </template>
       </div>
 
       <!-- Empty State -->
@@ -68,6 +82,15 @@
       <!-- Menu Items (appear when FAB is clicked) -->
       <transition name="menu-fade">
         <div v-if="showMenu" class="absolute bottom-16 right-0 flex flex-col items-end gap-3 mb-2">
+          <!-- Navigation Sub Menu -->
+          <ActionButton v-if="subMenus.length > 0" text="Navigasi Sub Menu" aria-label="Navigation" @click="toggleNavigation">
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            </template>
+          </ActionButton>
+
           <!-- Settings -->
           <ActionButton text="Pengaturan Teks" aria-label="Settings" @click="toggleSettings">
             <template #icon>
@@ -159,6 +182,42 @@
         </button>
       </div>
     </div>
+
+    <!-- Navigation Modal -->
+    <div v-if="showNavigationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click="showNavigationModal = false">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-fadeIn" @click.stop>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            Daftar Isi
+          </h3>
+          <button @click="showNavigationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+          <button v-for="menu in subMenus" :key="menu" 
+            @click="scrollToSection(menu)"
+            class="w-full text-left px-4 py-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/50 group flex items-center justify-between">
+            <span class="font-medium group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ menu }}</span>
+            <svg class="w-4 h-4 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <button @click="showNavigationModal = false" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-colors font-semibold">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
   </PageContainer>
 </template>
 
@@ -197,7 +256,15 @@ const isLoading = ref(false);
 const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
 const showSettingsModal = ref(false);
+const showNavigationModal = ref(false);
 let autoScrollInterval = null;
+
+// Computed for sub-menus
+const subMenus = computed(() => {
+  return zikirData.value
+    .filter(item => item.sub_menu)
+    .map(item => item.sub_menu);
+});
 
 // Set Dynamic Page Title
 useHead({
@@ -224,6 +291,12 @@ const toggleSettings = () => {
   showMenu.value = false;
 };
 
+// Toggle navigation modal
+const toggleNavigation = () => {
+  showNavigationModal.value = !showNavigationModal.value;
+  showMenu.value = false;
+};
+
 // Toggle menu
 const toggleMenu = () => {
   console.log('toggleMenu called');
@@ -237,6 +310,22 @@ const scrollToTop = () => {
     behavior: 'smooth'
   });
   showMenu.value = false;
+};
+
+// Scroll to section
+const scrollToSection = (headerLabel) => {
+  const element = document.getElementById(`section-${encodeURIComponent(headerLabel)}`);
+  if (element) {
+    const headerOffset = 100; // Account for sticky header if any
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
+  showNavigationModal.value = false;
 };
 
 // Toggle fullscreen
@@ -308,6 +397,7 @@ const printData = () => {
         <h1>${title.value}</h1>
         <p>${subtitle.value}</p>
         ${zikirData.value.map(item => `
+          ${item.sub_menu ? `<h2 style="margin-top: 30px; color: #059669; border-bottom: 2px solid #059669;">${item.sub_menu}</h2>` : ''}
           <div class="item">
             <div class="arab">${item.arab}</div>
             <div class="translation">${item.terjemah}</div>
@@ -326,6 +416,7 @@ const printData = () => {
 const downloadExcel = () => {
   const data = zikirData.value.map(item => ({
     No: item.no,
+    'Sub Menu': item.sub_menu || '',
     Arab: item.arab,
     Terjemah: item.terjemah
   }));
@@ -496,6 +587,24 @@ onUnmounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #059669, #047857);
+}
+
+/* Custom scrollbar for menu */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 /* Touch feedback for mobile */

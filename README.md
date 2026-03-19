@@ -36,3 +36,7 @@ npm run dev
 ```sh
 npm run build
 ```
+
+## 📄 Documentation
+
+Untuk panduan konfigurasi ulang Google Apps Script (GAS) sebagai API, silakan lihat file [APPS_SCRIPT_DOCS.md](APPS_SCRIPT_DOCS.md).
