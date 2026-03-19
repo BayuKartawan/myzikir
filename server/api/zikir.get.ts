@@ -51,7 +51,6 @@ export default defineEventHandler(async (event: H3Event): Promise<LocalApiRespon
         return response
 
     } catch (error: any) {
-        console.error('Fetch Error:', error)
         throw createError({
             statusCode: error.statusCode || 500,
             statusMessage: error.message || 'Gagal mengambil data dari server pusat',

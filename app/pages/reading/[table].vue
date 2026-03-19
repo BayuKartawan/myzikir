@@ -3,7 +3,7 @@
     <!-- Header -->
     <Header :icon="icon" :title="title" :subtitle="subtitle">
       <template #back-button>
-        <div class="mb-6 flex w-full justify-between ">
+        <div class="mb-6 flex w-full justify-between items-center">
           <NuxtLink to="/">
             <Button text="Kembali">
               <template #icon>
@@ -14,7 +14,7 @@
               </template>
             </Button>
           </NuxtLink>
-          <div class="flex gap-3">
+          <div class="flex gap-2">
             <Button text="Cetak" @click="printData">
               <template #icon>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,7 +23,7 @@
                 </svg>
               </template>
             </Button>
-            <Button text="Download Excel" @click="downloadExcel">
+            <Button text="Excel" @click="showDownloadExcelModal = true">
               <template #icon>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -32,14 +32,12 @@
               </template>
             </Button>
           </div>
-
         </div>
       </template>
     </Header>
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-20">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-4">
@@ -52,14 +50,14 @@
       <div v-else class="space-y-6">
         <template v-for="(item, index) in zikirData" :key="item.no">
           <!-- Sub-menu Header -->
-          <div v-if="item.sub_menu" :id="'section-' + encodeURIComponent(item.sub_menu)" class="pt-8 pb-4 animate-fadeIn">
+          <div v-if="item.sub_menu" :id="'section-' + encodeURIComponent(item.sub_menu)" class="pt-8 pb-4">
             <div class="flex items-center gap-3 mb-2">
               <div class="h-8 w-1.5 bg-emerald-500 rounded-full"></div>
               <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
                 {{ item.sub_menu }}
               </h2>
             </div>
-            <div class="h-px w-full bg-linear-to-r from-emerald-500/20 to-transparent"></div>
+            <div class="h-px w-full bg-emerald-500/10 dark:bg-emerald-500/20"></div>
           </div>
 
           <MainCard :id="'card-' + item.no" :no="item.no" :arab="item.arab" :translation="item.terjemah"
@@ -67,6 +65,7 @@
             @toggle="toggleCard" />
         </template>
       </div>
+
 
       <!-- Empty State -->
       <div v-if="!isLoading && zikirData.length === 0" class="text-center py-20">
@@ -79,141 +78,153 @@
 
     <!-- Floating Action Button Menu -->
     <div class="fixed bottom-6 right-6 z-50">
-      <!-- Menu Items (appear when FAB is clicked) -->
+      <!-- Menu Items -->
       <transition name="menu-fade">
         <div v-if="showMenu" class="absolute bottom-16 right-0 flex flex-col items-end gap-3 mb-2">
-          <!-- Navigation Sub Menu -->
-          <ActionButton v-if="subMenus.length > 0" text="Navigasi Sub Menu" aria-label="Navigation" @click="toggleNavigation">
+          <!-- Navigation -->
+          <ActionButton v-if="subMenus.length > 0" text="Daftar Isi" @click="toggleNavigation">
             <template #icon>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
+              <Icon name="lucide:list" class="w-5 h-5" />
             </template>
           </ActionButton>
 
           <!-- Settings -->
-          <ActionButton text="Pengaturan Teks" aria-label="Settings" @click="toggleSettings">
+          <ActionButton text="Pengaturan" @click="toggleSettings">
             <template #icon>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <Icon name="lucide:settings-2" class="w-5 h-5" />
             </template>
           </ActionButton>
 
           <!-- Auto Scroll -->
-          <ActionButton :text="isAutoScrolling ? 'Stop Auto Scroll' : 'Auto Scroll'" aria-label="Auto scroll"
-            @click="toggleAutoScroll">
+          <ActionButton :text="isAutoScrolling ? 'Stop Scroll' : 'Auto Scroll'" @click="toggleAutoScroll">
             <template #icon>
-              <svg v-if="!isAutoScrolling" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Icon :name="isAutoScrolling ? 'lucide:pause-circle' : 'lucide:play-circle'" class="w-5 h-5" />
             </template>
           </ActionButton>
 
           <!-- Fullscreen -->
-          <ActionButton :text="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'" aria-label="Toggle fullscreen"
-            @click="toggleFullscreen">
+          <ActionButton :text="isFullscreen ? 'Exit Full' : 'Fullscreen'" @click="toggleFullscreen">
             <template #icon>
-              <svg v-if="!isFullscreen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </template>
-          </ActionButton>
-
-          <!-- Scroll to Top -->
-          <ActionButton v-if="showScrollTop" text="Ke Atas" aria-label="Scroll to top" @click="scrollToTop">
-            <template #icon>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
+              <Icon :name="isFullscreen ? 'lucide:minimize' : 'lucide:maximize'" class="w-5 h-5" />
             </template>
           </ActionButton>
         </div>
       </transition>
 
       <!-- Main FAB Button -->
-      <button @click="toggleMenu"
-        class="p-3 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 active:scale-95"
-        :class="{ 'rotate-45': showMenu }" aria-label="Menu">
-        <svg class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
+      <button @click="showMenu = !showMenu"
+        class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center shrink-0"
+        :class="{ 'rotate-45': showMenu }">
+        <Icon name="lucide:plus" class="w-6 h-6 transition-transform" />
       </button>
     </div>
 
     <!-- Settings Modal -->
-    <div v-if="showSettingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50" @click="showSettingsModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-4 max-w-sm w-full" @click.stop>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pengaturan Teks</h3>
-        
+    <div v-if="showSettingsModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click="showSettingsModal = false">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn" @click.stop>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <Icon name="lucide:settings-2" class="text-emerald-500" />
+          Pengaturan Teks
+        </h3>
+
         <!-- Arabic Size -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ukuran Teks Arab</label>
-          <select v-model="arabSize" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            <option value="text-2xl sm:text-4xl">Kecil</option>
-            <option value="text-3xl sm:text-5xl">Sedang</option>
-            <option value="text-4xl sm:text-6xl">Besar</option>
-            <option value="text-5xl sm:text-7xl">Sangat Besar</option>
-          </select>
-        </div>
-        
-        <!-- Translation Size -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ukuran Teks Terjemah</label>
-          <select v-model="translationSize" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            <option value="text-sm sm:text-base">Kecil</option>
-            <option value="text-base sm:text-lg">Sedang</option>
-            <option value="text-lg sm:text-xl">Besar</option>
-            <option value="text-xl sm:text-2xl">Sangat Besar</option>
-          </select>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Ukuran Teks Arab</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button v-for="size in [
+              { label: 'Kecil', val: 'text-2xl sm:text-4xl' },
+              { label: 'Sedang', val: 'text-3xl sm:text-5xl' },
+              { label: 'Besar', val: 'text-4xl sm:text-6xl' },
+              { label: 'Extra', val: 'text-5xl sm:text-7xl' }
+            ]" :key="size.val" @click="arabSize = size.val"
+              class="px-3 py-2 rounded-xl text-sm font-medium transition-all" :class="arabSize === size.val
+                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'">
+              {{ size.label }}
+            </button>
+          </div>
         </div>
-        
-        <button @click="showSettingsModal = false" class="w-full px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors">
-          Tutup
+
+        <!-- Translation Size -->
+        <div class="mb-8">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Ukuran Terjemah</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button v-for="size in [
+              { label: 'Kecil', val: 'text-sm sm:text-base' },
+              { label: 'Sedang', val: 'text-base sm:text-lg' },
+              { label: 'Besar', val: 'text-lg sm:text-xl' },
+              { label: 'Extra', val: 'text-xl sm:text-2xl' }
+            ]" :key="size.val" @click="translationSize = size.val"
+              class="px-3 py-2 rounded-xl text-sm font-medium transition-all" :class="translationSize === size.val
+                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'">
+              {{ size.label }}
+            </button>
+          </div>
+        </div>
+
+        <button @click="showSettingsModal = false"
+          class="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all font-bold shadow-lg shadow-emerald-500/25">
+          Simpan Perubahan
         </button>
       </div>
     </div>
 
     <!-- Navigation Modal -->
-    <div v-if="showNavigationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click="showNavigationModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-fadeIn" @click.stop>
+    <div v-if="showNavigationModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click="showNavigationModal = false">
+      <div
+        class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-fadeIn"
+        @click.stop>
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
+            <Icon name="lucide:list" class="text-emerald-500" />
             Daftar Isi
           </h3>
-          <button @click="showNavigationModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button @click="showNavigationModal = false"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <Icon name="lucide:x" class="w-6 h-6" />
           </button>
         </div>
-        
+
         <div class="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-          <button v-for="menu in subMenus" :key="menu" 
-            @click="scrollToSection(menu)"
-            class="w-full text-left px-4 py-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/50 group flex items-center justify-between">
-            <span class="font-medium group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ menu }}</span>
-            <svg class="w-4 h-4 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+          <button v-for="menu in subMenus" :key="menu" @click="scrollToSection(menu)"
+            class="w-full text-left px-4 py-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/30 group flex items-center justify-between">
+            <span class="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ menu }}</span>
+            <Icon name="lucide:chevron-right"
+              class="w-5 h-5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
           </button>
         </div>
-        
-        <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
-          <button @click="showNavigationModal = false" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-colors font-semibold">
-            Tutup
+      </div>
+    </div>
+
+    <!-- Download Excel Modal -->
+    <div v-if="showDownloadExcelModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      @click="showDownloadExcelModal = false">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-fadeIn text-center"
+        @click.stop>
+        <div
+          class="w-20 h-20 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Icon name="lucide:file-spreadsheet" class="w-10 h-10 text-emerald-500" />
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Download Excel</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-8">
+          Apakah Anda ingin mengunduh data "{{ title }}" dalam format Microsoft Excel (.xlsx)?
+        </p>
+
+        <div class="flex flex-col gap-3">
+          <button @click="downloadExcel"
+            class="w-full px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+            <Icon name="lucide:download" class="w-5 h-5" />
+            Download Sekarang
+          </button>
+          <button @click="showDownloadExcelModal = false"
+            class="w-full px-6 py-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl transition-all font-bold">
+            Batal
           </button>
         </div>
       </div>
@@ -248,15 +259,15 @@ const title = ref('Reading View');
 const subtitle = ref('Ketuk kartu untuk melihat terjemahan');
 const icon = ref('lucide:book-marked');
 const expandedCards = ref(new Set());
-const showScrollTop = ref(false);
-const showMenu = ref(false);
-const isFullscreen = ref(false);
-const isAutoScrolling = ref(false);
 const isLoading = ref(false);
 const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
 const showSettingsModal = ref(false);
 const showNavigationModal = ref(false);
+const showDownloadExcelModal = ref(false);
+const showMenu = ref(false);
+const isFullscreen = ref(false);
+const isAutoScrolling = ref(false);
 let autoScrollInterval = null;
 
 // Computed for sub-menus
@@ -285,98 +296,70 @@ const toggleCard = (no) => {
   expandedCards.value = new Set(expandedCards.value);
 };
 
-// Toggle settings modal
-const toggleSettings = () => {
-  showSettingsModal.value = !showSettingsModal.value;
-  showMenu.value = false;
-};
-
-// Toggle navigation modal
-const toggleNavigation = () => {
-  showNavigationModal.value = !showNavigationModal.value;
-  showMenu.value = false;
-};
-
-// Toggle menu
-const toggleMenu = () => {
-  console.log('toggleMenu called');
-  showMenu.value = !showMenu.value;
-};;
-
-// Scroll to top function
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-  showMenu.value = false;
-};
-
 // Scroll to section
 const scrollToSection = (headerLabel) => {
   const element = document.getElementById(`section-${encodeURIComponent(headerLabel)}`);
   if (element) {
-    const headerOffset = 100; // Account for sticky header if any
+    const headerOffset = 100;
     const elementPosition = element.getBoundingClientRect().top;
     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth'
+      behavior: 'auto'
     });
   }
   showNavigationModal.value = false;
 };
 
-// Toggle fullscreen
+// Action Button Handlers
+const toggleSettings = () => {
+  showSettingsModal.value = true;
+  showMenu.value = false;
+};
+
+const toggleNavigation = () => {
+  showNavigationModal.value = true;
+  showMenu.value = false;
+};
+
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen().then(() => {
       isFullscreen.value = true;
-    }).catch((err) => {
-      console.error('Error attempting to enable fullscreen:', err);
-    });
+    }).catch(() => {});
   } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen().then(() => {
-        isFullscreen.value = false;
-      });
-    }
+    document.exitFullscreen().then(() => {
+      isFullscreen.value = false;
+    });
   }
   showMenu.value = false;
 };
 
-// Toggle auto scroll
 const toggleAutoScroll = () => {
   if (isAutoScrolling.value) {
-    // Stop auto scroll
-    if (autoScrollInterval) {
-      clearInterval(autoScrollInterval);
-      autoScrollInterval = null;
-    }
+    if (autoScrollInterval) clearInterval(autoScrollInterval);
+    autoScrollInterval = null;
     isAutoScrolling.value = false;
   } else {
-    // Start auto scroll
     isAutoScrolling.value = true;
     autoScrollInterval = setInterval(() => {
       const currentScroll = window.scrollY;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-
       if (currentScroll >= maxScroll) {
-        // Reached bottom, stop auto scroll
         clearInterval(autoScrollInterval);
         autoScrollInterval = null;
         isAutoScrolling.value = false;
       } else {
-        // Scroll down smoothly
-        window.scrollBy({
-          top: 1,
-          behavior: 'smooth'
-        });
+        window.scrollBy(0, 1);
       }
-    }, 30); // Adjust speed here (lower = faster)
+    }, 40);
   }
   showMenu.value = false;
+};
+
+const handleFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement;
 };
 
 // Print data
@@ -409,7 +392,6 @@ const printData = () => {
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.print();
-  showMenu.value = false;
 };
 
 // Download Excel
@@ -424,17 +406,7 @@ const downloadExcel = () => {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Zikir');
   XLSX.writeFile(wb, `${title.value}.xlsx`);
-  showMenu.value = false;
-};
-
-// Handle scroll event to show/hide scroll to top button
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 300;
-};
-
-// Handle fullscreen change
-const handleFullscreenChange = () => {
-  isFullscreen.value = !!document.fullscreenElement;
+  showDownloadExcelModal.value = false;
 };
 
 // Fetch data function
@@ -464,7 +436,7 @@ const fetchData = async (tableKey) => {
       throw new Error('Format data tidak sesuai atau tabel tidak ditemukan');
     }
   } catch (err) {
-    console.error('Error fetching zikir:', err);
+    // Error is handled silently for production mode
   } finally {
     isLoading.value = false;
   }
@@ -476,26 +448,16 @@ onMounted(async () => {
   if (table) {
     await fetchData(table.replace(/-/g, '_'));
   }
-
-  window.addEventListener('scroll', handleScroll);
   document.addEventListener('fullscreenchange', handleFullscreenChange);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
   document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  if (autoScrollInterval) {
-    clearInterval(autoScrollInterval);
-  }
+  if (autoScrollInterval) clearInterval(autoScrollInterval);
 });
 </script>
 
 <style scoped>
-/* Smooth scrolling */
-* {
-  scroll-behavior: smooth;
-}
-
 /* Fade-in animation */
 @keyframes fadeIn {
   from {
@@ -513,56 +475,14 @@ onUnmounted(() => {
   animation: fadeIn 0.4s ease-out;
 }
 
-/* Fade-slide transition for scroll to top button */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.3s ease;
+/* Menu fade animation */
+.menu-fade-enter-active, .menu-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fade-slide-enter-from {
+.menu-fade-enter-from, .menu-fade-leave-to {
   opacity: 0;
-  transform: translateY(20px) scale(0.8);
-}
-
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(20px) scale(0.8);
-}
-
-/* Menu fade animation for FAB menu items */
-.menu-fade-enter-active {
-  transition: all 0.3s ease;
-}
-
-.menu-fade-leave-active {
-  transition: all 0.2s ease;
-}
-
-.menu-fade-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.menu-fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-/* Pulse animation */
-@keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transform: translateY(20px) scale(0.9);
 }
 
 /* Custom scrollbar */
