@@ -81,13 +81,7 @@
       <!-- Menu Items -->
       <transition name="menu-fade">
         <div v-if="showMenu" class="absolute bottom-16 right-0 flex flex-col items-end gap-3 mb-2">
-          <!-- Navigation -->
-          <ActionButton v-if="subMenus.length > 0" text="Daftar Isi" @click="toggleNavigation">
-            <template #icon>
-              <Icon name="lucide:list" class="w-5 h-5" />
-            </template>
-          </ActionButton>
-
+          
           <!-- Settings -->
           <ActionButton text="Pengaturan" @click="toggleSettings">
             <template #icon>
@@ -108,6 +102,14 @@
               <Icon :name="isFullscreen ? 'lucide:minimize' : 'lucide:maximize'" class="w-5 h-5" />
             </template>
           </ActionButton>
+
+          <!-- Navigation -->
+          <ActionButton v-if="zikirData.length > 0" text="Daftar Isi" @click="toggleNavigation">
+            <template #icon>
+              <Icon name="lucide:list" class="w-5 h-5" />
+            </template>
+          </ActionButton>
+
         </div>
       </transition>
 
@@ -119,9 +121,8 @@
       </button>
     </div>
 
-    <!-- Settings Modal -->
     <div v-if="showSettingsModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       @click="showSettingsModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-fadeIn" @click.stop>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
@@ -174,7 +175,7 @@
 
     <!-- Navigation Modal -->
     <div v-if="showNavigationModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       @click="showNavigationModal = false">
       <div
         class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl transform transition-all animate-fadeIn"
@@ -191,6 +192,21 @@
         </div>
 
         <div class="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+          <!-- Top / Header Navigation -->
+          <button @click="scrollToTop"
+            class="w-full text-left px-4 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold transition-all border border-emerald-100 dark:border-emerald-800/30 group flex items-center justify-between mb-4 sticky top-0 z-10 shadow-sm">
+            <div class="flex items-center gap-3">
+              <Icon name="lucide:arrow-up-circle" class="w-5 h-5" />
+              <span>{{ title }}</span>
+            </div>
+            <Icon name="lucide:chevron-right"
+              class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+          </button>
+
+          <div v-if="subMenus.length > 0" class="px-4 py-1 pb-2">
+            <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Sub Menu</div>
+          </div>
+
           <button v-for="menu in subMenus" :key="menu" @click="scrollToSection(menu)"
             class="w-full text-left px-4 py-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/30 group flex items-center justify-between">
             <span class="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ menu }}</span>
@@ -203,7 +219,7 @@
 
     <!-- Download Excel Modal -->
     <div v-if="showDownloadExcelModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       @click="showDownloadExcelModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-fadeIn text-center"
         @click.stop>
@@ -234,7 +250,6 @@
 
 <script setup>
 import { availableTables } from '~/utils/menu';
-import * as XLSX from 'xlsx';
 
 const props = defineProps({
   data: {
@@ -309,6 +324,15 @@ const scrollToSection = (headerLabel) => {
       behavior: 'auto'
     });
   }
+  showNavigationModal.value = false;
+};
+
+// Scroll to top
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'auto'
+  });
   showNavigationModal.value = false;
 };
 
@@ -395,7 +419,8 @@ const printData = () => {
 };
 
 // Download Excel
-const downloadExcel = () => {
+const downloadExcel = async () => {
+  const XLSX = await import('xlsx/xlsx.mjs');
   const data = zikirData.value.map(item => ({
     No: item.no,
     'Sub Menu': item.sub_menu || '',

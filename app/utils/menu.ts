@@ -20,6 +20,13 @@ export const availableTables = [
         description: 'Bacaan tahlil',
         icon: 'lucide:book-open'
     },
+    {
+        key: 'doa-tahlil',
+        apiKey: 'doa_tahlil',
+        label: 'Doa Tahlil',
+        description: 'Bacaan doa tahlil',
+        icon: 'lucide:book-open'
+    },
     // Nanti jika ada menu baru, cukup tambah satu objek di bawah ini:
     // { 
     //   key: 'zikir-pagi', 
