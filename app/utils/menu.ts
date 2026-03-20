@@ -29,6 +29,13 @@ export const availableTables = [
         description: 'Bacaan doa tahlil',
         icon: 'lucide:book-open'
     },
+    {
+        key: 'takbiran',
+        apiKey: 'takbiran',
+        label: 'Takbir Hari Raya',
+        description: 'Bacaan takbir hari raya',
+        icon: 'lucide:book-open'
+    },
     // Nanti jika ada menu baru, cukup tambah satu objek di bawah ini:
     // { 
     //   key: 'zikir-pagi', 
