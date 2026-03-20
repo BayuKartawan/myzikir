@@ -4,7 +4,8 @@ export const availableTables = [
         apiKey: 'zikir_setelah_shalat',
         label: 'Zikir Setelah Shalat',
         description: 'Bacaan zikir setelah melaksanakan shalat fardhu',
-        icon: 'lucide:book-marked'
+        icon: 'lucide:book-marked',
+        next: 'doa-setelah-shalat'
     },
     {
         key: 'doa-setelah-shalat',
@@ -18,7 +19,8 @@ export const availableTables = [
         apiKey: 'Tahlil',
         label: 'Tahlil',
         description: 'Bacaan tahlil',
-        icon: 'lucide:book-open'
+        icon: 'lucide:book-open',
+        next: 'doa-tahlil'
     },
     {
         key: 'doa-tahlil',

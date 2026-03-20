@@ -1,5 +1,14 @@
 <template>
   <PageContainer>
+    <!-- Background Refresh Indicator -->
+    <transition name="fade">
+      <div v-if="isRefreshing" 
+        class="fixed top-4 right-4 z-[100] flex items-center gap-2 bg-emerald-500/90 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-xl shadow-emerald-500/20 border border-white/20 animate-pulse pointer-events-none">
+        <div class="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Updating</span>
+      </div>
+    </transition>
+
     <!-- Header -->
     <Header :icon="icon" :title="title" :subtitle="subtitle">
       <template #back-button>
@@ -37,7 +46,7 @@
     </Header>
 
     <!-- Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-32 sm:pt-10 sm:pb-40">
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-20">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-4">
@@ -73,6 +82,33 @@
           <Icon name="lucide:search" class="text-5xl text-gray-400" />
         </div>
         <p class="text-base text-gray-500 dark:text-gray-400">Tidak ada data zikir tersedia.</p>
+      </div>
+
+      <!-- Navigation Button -->
+      <div v-if="!isLoading && zikirData.length > 0 && nextTable" class="mt-12">
+        <NuxtLink :to="'/reading/' + nextTable.key" class="group block">
+          <div class="relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 sm:p-8 shadow-sm transition-all duration-500 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 dark:hover:shadow-emerald-500/5 hover:-translate-y-1 active:scale-[0.98] group">
+            <!-- Decorative gradient -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/5 dark:to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            </div>
+
+            <div class="relative flex items-center justify-between">
+              <div class="flex-1 mr-4">
+                <p class="text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-bold mb-1 uppercase tracking-wider">Selanjutnya</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight transition-colors duration-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                  {{ nextTable.label }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1 truncate">
+                  {{ nextTable.description }}
+                </p>
+              </div>
+              <div class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:bg-emerald-500 group-hover:text-white transform group-hover:scale-110 group-hover:rotate-3">
+                <Icon name="lucide:arrow-right" class="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:text-white" />
+              </div>
+            </div>
+          </div>
+        </NuxtLink>
       </div>
     </div>
 
@@ -275,6 +311,7 @@ const subtitle = ref('Ketuk kartu untuk melihat terjemahan');
 const icon = ref('lucide:book-marked');
 const expandedCards = ref(new Set());
 const isLoading = ref(false);
+const isRefreshing = ref(false); // To show background refresh status if needed
 const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
 const showSettingsModal = ref(false);
@@ -290,6 +327,17 @@ const subMenus = computed(() => {
   return zikirData.value
     .filter(item => item.sub_menu)
     .map(item => item.sub_menu);
+});
+
+// Navigation logic
+const nextTable = computed(() => {
+  const tableKey = route.params.table;
+  const currentTable = availableTables.find(t => t.key === tableKey || t.apiKey === tableKey.replace(/-/g, '_'));
+  
+  if (currentTable && currentTable.next) {
+    return availableTables.find(t => t.key === currentTable.next);
+  }
+  return null;
 });
 
 // Set Dynamic Page Title
@@ -434,9 +482,47 @@ const downloadExcel = async () => {
   showDownloadExcelModal.value = false;
 };
 
+// Function to load from cache
+const loadCache = (tableKey) => {
+  if (import.meta.server) return false;
+  
+  const cacheKey = `zikir_cache_${tableKey}`;
+  const cached = localStorage.getItem(cacheKey);
+  
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        zikirData.value = parsed;
+        
+        // Metadata setup from available tables for quick header update
+        const selectedTableInfo = availableTables.find(t => t.apiKey === tableKey);
+        if (selectedTableInfo) {
+          title.value = selectedTableInfo.label;
+          subtitle.value = selectedTableInfo.description;
+          icon.value = selectedTableInfo.icon;
+        }
+        return true;
+      }
+    } catch (e) {
+      console.error('Error parsing cache:', e);
+    }
+  }
+  return false;
+};
+
 // Fetch data function
 const fetchData = async (tableKey) => {
-  isLoading.value = true;
+  const hasCache = loadCache(tableKey);
+  
+  // Show full loading spinner only if we don't have cache data
+  if (!hasCache) {
+    zikirData.value = [];
+    isLoading.value = true;
+  } else {
+    isRefreshing.value = true;
+  }
+
   try {
     const response = await fetch(`/api/zikir?table=${tableKey}`);
 
@@ -450,6 +536,11 @@ const fetchData = async (tableKey) => {
       const data = result.data;
       zikirData.value = data;
 
+      // Save to localStorage for future use
+      if (import.meta.client) {
+        localStorage.setItem(`zikir_cache_${tableKey}`, JSON.stringify(data));
+      }
+
       // Set title and subtitle dynamic from menu config
       const selectedTableInfo = availableTables.find(t => t.apiKey === tableKey);
       if (selectedTableInfo) {
@@ -461,9 +552,13 @@ const fetchData = async (tableKey) => {
       throw new Error('Format data tidak sesuai atau tabel tidak ditemukan');
     }
   } catch (err) {
-    // Error is handled silently for production mode
+    // If background fetch fails but we have cache, we just silent it
+    if (!hasCache) {
+      // Show some error state? For now keep it as it was (silent)
+    }
   } finally {
     isLoading.value = false;
+    isRefreshing.value = false;
   }
 };
 
@@ -476,6 +571,16 @@ onMounted(async () => {
   document.addEventListener('fullscreenchange', handleFullscreenChange);
 });
 
+// Watch for route changes to fetch new table data
+watch(() => route.params.table, (newTable) => {
+  if (newTable) {
+    fetchData(newTable.replace(/-/g, '_'));
+    // Reset expanded cards and scroll to top when changing menu
+    expandedCards.value = new Set();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+});
+
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange);
   if (autoScrollInterval) clearInterval(autoScrollInterval);
@@ -483,6 +588,16 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Fade animation for background refresh */
+.fade-enter-active, .fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+}
+
 /* Fade-in animation */
 @keyframes fadeIn {
   from {
