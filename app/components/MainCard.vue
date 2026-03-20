@@ -4,12 +4,12 @@
         :class="{
             'ring-1 ring-emerald-400/30 !shadow-md': isExpanded,
         }">
-        <div class="relative p-4 sm:p-6 lg:p-8">
+        <div class="relative p-4 lg:p-8">
 
             <!-- Header Section: Number Badge -->
-            <div class="flex items-center mb-4">
+            <div class="flex items-center mb-2">
                 <span
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-100 dark:border-emerald-400/10">
+                    class="inline-flex items-center justify-center w-8 h-4 rounded-lg bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-100 dark:border-emerald-400/10">
                     {{ no }}
                 </span>
             </div>

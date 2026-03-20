@@ -46,7 +46,7 @@
     </Header>
 
     <!-- Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-32 sm:pt-10 sm:pb-40">
+    <div class="max-w-4xl mx-auto px-2 pt-8 pb-32 sm:pt-10 sm:pb-40">
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-20">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-4">
@@ -56,7 +56,7 @@
       </div>
 
       <!-- Zikir List -->
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-2">
         <template v-for="(item, index) in zikirData" :key="item.no">
           <!-- Sub-menu Header -->
           <div v-if="item.sub_menu" :id="'section-' + encodeURIComponent(item.sub_menu)" class="pt-8 pb-4">
@@ -230,7 +230,7 @@
         <div class="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
           <!-- Top / Header Navigation -->
           <button @click="scrollToTop"
-            class="w-full text-left px-4 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold transition-all border border-emerald-100 dark:border-emerald-800/30 group flex items-center justify-between mb-4 sticky top-0 z-10 shadow-sm">
+            class="w-full text-left px-4 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold transition-all border border-emerald-100 dark:border-emerald-800/30 group flex items-center justify-between">
             <div class="flex items-center gap-3">
               <Icon name="lucide:arrow-up-circle" class="w-5 h-5" />
               <span>{{ title }}</span>
@@ -244,7 +244,7 @@
           </div>
 
           <button v-for="menu in subMenus" :key="menu" @click="scrollToSection(menu)"
-            class="w-full text-left px-4 py-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/30 group flex items-center justify-between">
+            class="w-full text-left px-4 py-2 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-gray-700 dark:text-gray-200 transition-all border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800/30 group flex items-center justify-between">
             <span class="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{{ menu }}</span>
             <Icon name="lucide:chevron-right"
               class="w-5 h-5 text-emerald-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
