@@ -1,47 +1,39 @@
 export const availableTables = [
     {
-        key: 'zikir-setelah-shalat',
-        apiKey: 'zikir_setelah_shalat',
+        key: 'z7s9p2w8',
+        nama_sheet: 'zikir_setelah_shalat',
         label: 'Zikir Setelah Shalat',
         description: 'Bacaan zikir setelah melaksanakan shalat fardhu',
         icon: 'lucide:book-marked',
-        next: 'doa-setelah-shalat'
+        next: 'd3s7q1x5'
     },
     {
-        key: 'doa-setelah-shalat',
-        apiKey: 'doa_setelah_shalat',
+        key: 'd3s7q1x5',
+        nama_sheet: 'doa_setelah_shalat',
         label: 'Doa Setelah Shalat',
         description: 'Bacaan doa setelah melaksanakan shalat fardhu',
         icon: 'lucide:sun'
     },
     {
-        key: 'tahlil',
-        apiKey: 'tahlil',
+        key: 't9h2m6b4',
+        nama_sheet: 'tahlil',
         label: 'Tahlil',
         description: 'Bacaan tahlil',
         icon: 'lucide:book-open',
-        next: 'doa-tahlil'
+        next: 'd4t8k2y7'
     },
     {
-        key: 'doa-tahlil',
-        apiKey: 'doa_tahlil',
+        key: 'd4t8k2y7',
+        nama_sheet: 'doa_tahlil',
         label: 'Doa Tahlil',
         description: 'Bacaan doa tahlil',
         icon: 'lucide:book-open'
     },
     {
-        key: 'takbiran',
-        apiKey: 'takbiran',
+        key: 't5b7r9w2',
+        nama_sheet: 'takbiran',
         label: 'Takbir Hari Raya',
         description: 'Bacaan takbir hari raya',
         icon: 'lucide:book-open'
-    },
-    // Nanti jika ada menu baru, cukup tambah satu objek di bawah ini:
-    // { 
-    //   key: 'zikir-pagi', 
-    //   apiKey: 'zikir_pagi', 
-    //   label: 'Zikir Pagi', 
-    //   description: 'Bacaan zikir pagi hari', 
-    //   icon: 'lucide:sunrise' 
-    // },
+    }
 ]

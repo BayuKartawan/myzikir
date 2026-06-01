@@ -1,21 +1,45 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, getHeader, createError } from 'h3'
 import type { H3Event } from 'h3'
 
 export default defineEventHandler(async (event: H3Event) => {
     const config = useRuntimeConfig()
     const body = await readBody(event)
 
-    if (!config.public.apiBaseUrl) {
+    // 1. Pastikan database API URL dikonfigurasi
+    if (!config.apiBaseUrl) {
         throw createError({
             statusCode: 500,
             statusMessage: 'API URL tidak terkonfigurasi di server',
         })
     }
 
+    // 2. Verifikasi Password Admin untuk aksi tulis (POST)
+    if (!config.adminPassword) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Password admin belum dikonfigurasi di server',
+        })
+    }
+
+    const password = getHeader(event, 'x-admin-password')
+    if (password !== config.adminPassword) {
+        throw createError({
+            statusCode: 401,
+            statusMessage: 'Password admin tidak valid',
+        })
+    }
+
+    // 3. Masukkan secret key untuk otentikasi GAS (Google Apps Script)
+    const requestBody = {
+        ...body,
+        secret: config.apiSecretKey || ''
+    }
+
     try {
-        const response = await $fetch<any>(config.public.apiBaseUrl, {
+        // Teruskan data ke Google Apps Script Web App
+        const response = await $fetch<any>(config.apiBaseUrl, {
             method: 'POST',
-            body: body,
+            body: requestBody,
             headers: {
                 'Content-Type': 'application/json'
             }

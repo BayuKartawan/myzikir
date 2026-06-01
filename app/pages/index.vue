@@ -61,6 +61,41 @@ const handleCardClick = (table) => {
   if (table.isPlaceholder) return;
   router.push('/reading/' + table.key);
 };
+
+onMounted(async () => {
+  if (import.meta.client) {
+    const cached = localStorage.getItem('zikir_cache_menu_config');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          availableTables.value = [
+            ...parsed,
+            { key: 'placeholder1', label: 'Segera Hadir', description: 'Menu dzikir lainnya akan ditambahkan', icon: 'lucide:plus', isPlaceholder: true }
+          ];
+        }
+      } catch (e) {}
+    }
+  }
+
+  try {
+    const response = await fetch('/api/zikir?table=menu_config');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
+        availableTables.value = [
+          ...result.data,
+          { key: 'placeholder1', label: 'Segera Hadir', description: 'Menu dzikir lainnya akan ditambahkan', icon: 'lucide:plus', isPlaceholder: true }
+        ];
+        if (import.meta.client) {
+          localStorage.setItem('zikir_cache_menu_config', JSON.stringify(result.data));
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Gagal memuat menu dinamis, menggunakan fallback:', e);
+  }
+});
 </script>
 
 <style scoped>

@@ -1,4 +1,4 @@
-import { defineEventHandler, getQuery, createError } from 'h3'
+import { defineEventHandler, getQuery, createError, getHeader } from 'h3'
 import type { H3Event } from 'h3'
 
 // Interface untuk data dari Google Apps Script
@@ -14,11 +14,23 @@ interface LocalApiResponse {
 }
 
 export default defineEventHandler(async (event: H3Event): Promise<LocalApiResponse | GoogleApiResponse> => {
+    // Mencegah akses langsung API dari browser (direct navigation)
+    const secFetchMode = getHeader(event, 'sec-fetch-mode')
+    const secFetchDest = getHeader(event, 'sec-fetch-dest')
+    const accept = getHeader(event, 'accept') || ''
+
+    if (secFetchMode === 'navigate' || secFetchDest === 'document' || accept.includes('text/html')) {
+        throw createError({
+            statusCode: 403,
+            statusMessage: 'Akses API langsung dilarang',
+        })
+    }
+
     const config = useRuntimeConfig()
     const query = getQuery(event)
     const tableParam = query.table as string | undefined
 
-    if (!config.public.apiBaseUrl) {
+    if (!config.apiBaseUrl) {
         throw createError({
             statusCode: 500,
             statusMessage: 'API URL tidak terkonfigurasi di server',
@@ -26,8 +38,12 @@ export default defineEventHandler(async (event: H3Event): Promise<LocalApiRespon
     }
 
     try {
-        // Memanggil API eksternal dengan tipe eksplisit
-        const response = await $fetch<GoogleApiResponse>(config.public.apiBaseUrl)
+        // Memanggil API eksternal dengan tipe eksplisit dan menyertakan secret key
+        const targetUrl = config.apiSecretKey
+            ? `${config.apiBaseUrl}?secret=${encodeURIComponent(config.apiSecretKey)}`
+            : config.apiBaseUrl
+
+        const response = await $fetch<GoogleApiResponse>(targetUrl)
 
         if (response.status !== 'success') {
             throw createError({

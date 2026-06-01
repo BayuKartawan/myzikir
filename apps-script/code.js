@@ -3,6 +3,17 @@
  */
 function doGet(e) {
   try {
+    const scriptProperties = PropertiesService.getScriptProperties();
+    const allowedSecret = scriptProperties.getProperty('API_SECRET_KEY') || 'myzikir_secret_key_123';
+    
+    // Verifikasi secret key jika dikonfigurasi di Script Properties atau menggunakan fallback default
+    if (allowedSecret) {
+      const clientSecret = e.parameter.secret;
+      if (clientSecret !== allowedSecret) {
+        return createJsonResponse({ status: "error", message: "Unauthorized" });
+      }
+    }
+
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     const result = {};
@@ -56,6 +67,18 @@ function doGet(e) {
 function doPost(e) {
   try {
     const postData = JSON.parse(e.postData.contents);
+    
+    const scriptProperties = PropertiesService.getScriptProperties();
+    const allowedSecret = scriptProperties.getProperty('API_SECRET_KEY') || 'myzikir_secret_key_123';
+    
+    // Verifikasi secret key jika dikonfigurasi di Script Properties atau menggunakan fallback default
+    if (allowedSecret) {
+      const clientSecret = postData.secret;
+      if (clientSecret !== allowedSecret) {
+        return createJsonResponse({ status: "error", message: "Unauthorized" });
+      }
+    }
+
     const action = postData.action; // 'create', 'update', 'delete'
     const table = postData.table;   // e.g. 'zikir_setelah_shalat'
     

@@ -32,9 +32,12 @@ export default defineNuxtConfig({
     },
 
     runtimeConfig: {
+        // Secret keys only accessible on the server-side
+        apiBaseUrl: process.env.VITE_API_URL || '',
+        apiSecretKey: process.env.API_SECRET_KEY || '',
+        adminPassword: process.env.ADMIN_PASSWORD || '',
+
         // Keys within public are also exposed client-side
-        public: {
-            apiBaseUrl: process.env.VITE_API_URL || ''
-        }
+        public: {}
     }
 })

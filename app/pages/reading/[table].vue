@@ -300,7 +300,7 @@ const title = ref('Reading View');
 const subtitle = ref('Ketuk kartu untuk melihat terjemahan');
 const icon = ref('lucide:book-marked');
 const expandedCards = ref(new Set());
-const isLoading = ref(false);
+const isLoading = ref(true);
 const isRefreshing = ref(false);
 const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
@@ -312,6 +312,9 @@ const isFullscreen = ref(false);
 const isAutoScrolling = ref(false);
 let autoScrollInterval = null;
 
+// Computed for active menu list (fallback to static availableTables)
+const activeMenuList = ref([...availableTables]);
+
 // Computed for sub-menus
 const subMenus = computed(() => {
   return zikirData.value
@@ -322,10 +325,16 @@ const subMenus = computed(() => {
 // Navigation logic
 const nextTable = computed(() => {
   const tableKey = route.params.table;
-  const currentTable = availableTables.find(t => t.key === tableKey || t.apiKey === tableKey.replace(/-/g, '_'));
+  const currentTable = activeMenuList.value.find(t => t.key === tableKey);
   
-  if (currentTable && currentTable.next) {
-    return availableTables.find(t => t.key === currentTable.next);
+  if (currentTable) {
+    if (currentTable.next) {
+      return activeMenuList.value.find(t => t.key === currentTable.next);
+    }
+    const currentIndex = activeMenuList.value.findIndex(t => t.nama_sheet === currentTable.nama_sheet);
+    if (currentIndex !== -1 && currentIndex < activeMenuList.value.length - 1) {
+      return activeMenuList.value[currentIndex + 1];
+    }
   }
   return null;
 });
@@ -472,6 +481,62 @@ const downloadExcel = async () => {
   showDownloadExcelModal.value = false;
 };
 
+// Load menu configuration (sync cache first, then background refresh)
+const loadMenuFromCache = () => {
+  if (import.meta.server) return false;
+  const cached = localStorage.getItem('zikir_cache_menu_config');
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        activeMenuList.value = parsed;
+        return true;
+      }
+    } catch (e) {}
+  }
+  return false;
+};
+
+// Background refresh menu config (non-blocking)
+const refreshMenuConfig = () => {
+  fetch('/api/zikir?table=menu_config')
+    .then(res => res.ok ? res.json() : null)
+    .then(result => {
+      if (result?.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
+        activeMenuList.value = result.data;
+        if (import.meta.client) {
+          localStorage.setItem('zikir_cache_menu_config', JSON.stringify(result.data));
+        }
+      }
+    })
+    .catch(() => {});
+};
+
+// Fetch menu config: await only if no cache available
+const fetchMenuConfig = async () => {
+  const hasCache = loadMenuFromCache();
+  if (hasCache) {
+    // Cache loaded synchronously, refresh in background
+    refreshMenuConfig();
+    return;
+  }
+  // No cache — must await the network fetch
+  try {
+    const response = await fetch('/api/zikir?table=menu_config');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
+        activeMenuList.value = result.data;
+        if (import.meta.client) {
+          localStorage.setItem('zikir_cache_menu_config', JSON.stringify(result.data));
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Gagal memuat menu dinamis untuk bacaan:', e);
+  }
+};
+
 // Function to load from cache
 const loadCache = (tableKey) => {
   if (import.meta.server) return false;
@@ -485,8 +550,8 @@ const loadCache = (tableKey) => {
       if (Array.isArray(parsed) && parsed.length > 0) {
         zikirData.value = parsed;
         
-        // Metadata setup from available tables for quick header update
-        const selectedTableInfo = availableTables.find(t => t.apiKey === tableKey);
+        // Metadata setup from active menu config
+        const selectedTableInfo = activeMenuList.value.find(t => t.nama_sheet === tableKey);
         if (selectedTableInfo) {
           title.value = selectedTableInfo.label;
           subtitle.value = selectedTableInfo.description;
@@ -531,8 +596,8 @@ const fetchData = async (tableKey) => {
         localStorage.setItem(`zikir_cache_${tableKey}`, JSON.stringify(data));
       }
 
-      // Set title and subtitle dynamic from menu config
-      const selectedTableInfo = availableTables.find(t => t.apiKey === tableKey);
+      // Set title and subtitle dynamic from active menu config
+      const selectedTableInfo = activeMenuList.value.find(t => t.nama_sheet === tableKey);
       if (selectedTableInfo) {
         title.value = selectedTableInfo.label;
         subtitle.value = selectedTableInfo.description;
@@ -543,9 +608,6 @@ const fetchData = async (tableKey) => {
     }
   } catch (err) {
     // If background fetch fails but we have cache, we just silent it
-    if (!hasCache) {
-      // Show some error state?
-    }
   } finally {
     isLoading.value = false;
     isRefreshing.value = false;
@@ -555,16 +617,44 @@ const fetchData = async (tableKey) => {
 // Lifecycle hooks
 onMounted(async () => {
   const table = route.params.table;
+
+  // 1. Load menu config (sync cache, or await network if no cache)
+  await fetchMenuConfig();
+
+  // 2. Set title/icon from menu list immediately (before data fetch)
   if (table) {
-    await fetchData(table.replace(/-/g, '_'));
+    const selectedTableInfo = activeMenuList.value.find(t => t.key === table);
+    if (selectedTableInfo) {
+      title.value = selectedTableInfo.label;
+      subtitle.value = selectedTableInfo.description || subtitle.value;
+      icon.value = selectedTableInfo.icon || icon.value;
+    }
+
+    // 3. Fetch actual zikir data
+    const sheetToFetch = selectedTableInfo ? selectedTableInfo.nama_sheet : table.replace(/-/g, '_');
+    await fetchData(sheetToFetch);
+  } else {
+    isLoading.value = false;
   }
   document.addEventListener('fullscreenchange', handleFullscreenChange);
 });
 
 // Watch for route changes to fetch new table data
-watch(() => route.params.table, (newTable) => {
+watch(() => route.params.table, async (newTable) => {
   if (newTable) {
-    fetchData(newTable.replace(/-/g, '_'));
+    // No need to re-fetch menu_config — use existing activeMenuList
+    const selectedTableInfo = activeMenuList.value.find(t => t.key === newTable);
+    
+    // Set title/icon immediately
+    if (selectedTableInfo) {
+      title.value = selectedTableInfo.label;
+      subtitle.value = selectedTableInfo.description || subtitle.value;
+      icon.value = selectedTableInfo.icon || icon.value;
+    }
+
+    const sheetToFetch = selectedTableInfo ? selectedTableInfo.nama_sheet : newTable.replace(/-/g, '_');
+    isLoading.value = true;
+    await fetchData(sheetToFetch);
     // Reset expanded cards and scroll to top when changing menu
     expandedCards.value = new Set();
     window.scrollTo({ top: 0, behavior: 'instant' });
