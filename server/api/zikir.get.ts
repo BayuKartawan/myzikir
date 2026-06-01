@@ -39,11 +39,16 @@ export default defineEventHandler(async (event: H3Event): Promise<LocalApiRespon
         // Jika ada parameter table, kita filter datanya di sini
         if (tableParam) {
             // Normalisasi key (misal: zikir-setelah-shalat -> zikir_setelah_shalat)
-            const normalizedKey = tableParam.replace(/-/g, '_')
+            const normalizedKey = tableParam.replace(/-/g, '_').toLowerCase()
+
+            // Cari key di response.data secara case-insensitive
+            const actualKey = Object.keys(response.data).find(
+                key => key.toLowerCase() === normalizedKey
+            )
 
             return {
                 status: 'success',
-                data: response.data[normalizedKey] || []
+                data: actualKey ? response.data[actualKey] : []
             }
         }
 

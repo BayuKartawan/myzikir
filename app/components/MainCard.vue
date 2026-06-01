@@ -1,8 +1,8 @@
 <template>
     <div @click="$emit('toggle', no)"
-        class="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer will-change-transform"
+        class="group relative overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl sm:rounded-3xl cursor-pointer"
         :class="{
-            'ring-1 ring-emerald-400/30 !shadow-md': isExpanded,
+            'ring-1 ring-emerald-400/30': isExpanded,
         }">
         <div class="relative p-4 lg:p-8">
 
@@ -22,7 +22,7 @@
             </div>
 
             <!-- Translation Section (simplified) -->
-            <div v-if="isExpanded" class="animate-fadeIn">
+            <div v-if="isExpanded">
                 <div class="pt-6 border-t border-gray-50 dark:border-gray-700/50">
                     <p :class="['text-gray-600 dark:text-gray-300 leading-relaxed font-light italic', translationSize]">
                         "{{ translation }}"

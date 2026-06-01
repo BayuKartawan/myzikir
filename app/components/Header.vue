@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border-b border-gray-100 dark:border-gray-700/50">
+  <div class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
       <slot name="back-button" />
 

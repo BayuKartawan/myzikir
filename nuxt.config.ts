@@ -1,3 +1,4 @@
+import { defineNuxtConfig } from 'nuxt/config'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -12,6 +13,14 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
 
     modules: ['@nuxt/icon'],
+
+    // @ts-ignore
+    icon: {
+        clientBundle: {
+            scan: true,
+            sizeLimitKb: 256,
+        },
+    },
 
     // CSS path is relative to the new app directory in Nuxt 4
     css: ['~/assets/main.css'],

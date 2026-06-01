@@ -2,8 +2,8 @@
 
 @font-face {
   font-family: 'Hafs';
-  src: url('/fonts/hafs/KFGQPC Uthmanic Script HAFS Regular.woff2') format('woff2'),
-       url('/fonts/hafs/KFGQPC Uthmanic Script HAFS Regular.woff') format('woff');
+  src: url('/fonts/hafs/kfgqpc-uthmanic-script-hafs-regular.woff2') format('woff2'),
+       url('/fonts/hafs/kfgqpc-uthmanic-script-hafs-regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }

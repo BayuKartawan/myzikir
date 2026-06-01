@@ -15,8 +15,8 @@ export const availableTables = [
         icon: 'lucide:sun'
     },
     {
-        key: 'Tahlil',
-        apiKey: 'Tahlil',
+        key: 'tahlil',
+        apiKey: 'tahlil',
         label: 'Tahlil',
         description: 'Bacaan tahlil',
         icon: 'lucide:book-open',

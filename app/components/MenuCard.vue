@@ -1,48 +1,39 @@
 <template>
   <div
-    class="group relative overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-sm hover:shadow-2xl border border-gray-100 dark:border-gray-700/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+    class="flex items-center gap-4 p-4 sm:p-5 rounded-2xl border border-gray-150 dark:border-gray-800 bg-white dark:bg-gray-900 cursor-pointer hover:border-emerald-500 dark:hover:border-emerald-500 group"
     :class="{ 'opacity-50 cursor-not-allowed': isPlaceholder }"
     @click="isPlaceholder ? null : $emit('click')"
   >
-    <!-- Decorative gradient -->
+    <!-- Icon -->
     <div
-      class="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-400/5 dark:to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+      class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl shrink-0"
+      :class="{ 'bg-gray-100 dark:bg-gray-800': isPlaceholder }"
+    >
+      <Icon v-if="!isLoading" :name="icon" class="text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400" />
+      <div v-else class="rounded-full h-5 w-5 border-b-2 border-emerald-500"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <h2
+        class="text-base sm:text-lg font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+        :class="{ 'group-hover:text-gray-900 dark:group-hover:text-white': isPlaceholder }"
+      >
+        {{ label }}
+      </h2>
+      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+        {{ description }}
+      </p>
+    </div>
+
+    <!-- Arrow indicator -->
+    <div
+      class="text-gray-400 group-hover:text-emerald-500 shrink-0"
       v-if="!isPlaceholder"
-    ></div>
-
-    <div class="relative">
-      <!-- Icon -->
-      <div
-        class="flex items-center justify-center w-14 h-14 bg-emerald-500/10 dark:bg-emerald-400/10 rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500"
-        :class="{ 'bg-gray-200 dark:bg-gray-700': isPlaceholder }"
-      >
-        <Icon v-if="!isLoading" :name="icon" class="text-3xl text-emerald-600 dark:text-emerald-400" />
-        <div v-else class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-      </div>
-
-      <!-- Content -->
-      <div class="space-y-2">
-        <h2
-          class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300"
-          :class="{ 'group-hover:text-gray-900 dark:group-hover:text-white': isPlaceholder }"
-        >
-          {{ label }}
-        </h2>
-        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-          {{ description }}
-        </p>
-      </div>
-
-      <!-- Arrow indicator -->
-      <div
-        class="flex items-center mt-6 text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-0 group-hover:translate-x-2"
-        v-if="!isPlaceholder"
-      >
-        <span class="text-sm font-medium">Buka</span>
-        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
     </div>
   </div>
 </template>
