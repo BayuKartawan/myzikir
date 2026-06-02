@@ -280,89 +280,187 @@
           </h3>
 
           <form @submit.prevent="submitForm" class="space-y-4">
-            <!-- Nomor Urut -->
-            <div>
-              <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Nomor Urut (no)</label>
-              <input type="number" v-model.number="form.no" required :disabled="isEditMode"
-                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 disabled:opacity-50"
-                placeholder="Contoh: 1" />
+            <!-- Tab Selector for selectedTable !== 'menu_config' (Hanya saat tambah data zikir baru) -->
+            <div v-if="!isEditMode && selectedTable !== 'menu_config'" class="flex border-b border-gray-150 dark:border-gray-800 mb-4">
+              <button type="button" @click="activeAddTab = 'manual'"
+                class="flex-1 pb-2 text-sm font-bold border-b-2 text-center cursor-pointer"
+                :class="activeAddTab === 'manual' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-400 hover:text-gray-600'">
+                Input Manual
+              </button>
+              <button type="button" @click="activeAddTab = 'ai'"
+                class="flex-1 pb-2 text-sm font-bold border-b-2 text-center cursor-pointer"
+                :class="activeAddTab === 'ai' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-400 hover:text-gray-600'">
+                🪄 Hasilkan dengan AI
+              </button>
             </div>
 
-            <!-- Conditionally render inputs for menu_config -->
-            <template v-if="selectedTable === 'menu_config'">
-              <!-- Nama Sheet -->
+            <!-- Bagian Form Manual (Tampil jika manual mode, edit mode, atau menu_config) -->
+            <template v-if="selectedTable === 'menu_config' || isEditMode || activeAddTab === 'manual'">
+              <!-- Nomor Urut -->
               <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Nama Sheet (harus sama dengan nama tab di Google Sheets)</label>
-                <input type="text" v-model="form.nama_sheet" required
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
-                  placeholder="Contoh: zikir_setelah_shalat" />
-                <p class="text-[10px] text-gray-400 mt-1">Gunakan huruf kecil dan underscore. Contoh: zikir_pagi, doa_tahlil</p>
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Nomor Urut (no)</label>
+                <input type="number" v-model.number="form.no" required :disabled="isEditMode"
+                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                  placeholder="Contoh: 1" />
               </div>
 
+              <!-- Conditionally render inputs for menu_config -->
+              <template v-if="selectedTable === 'menu_config'">
+                <!-- Nama Sheet -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Nama Sheet (harus sama dengan nama tab di Google Sheets)</label>
+                  <input type="text" v-model="form.nama_sheet" required
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
+                    placeholder="Contoh: zikir_setelah_shalat" />
+                  <p class="text-[10px] text-gray-400 mt-1">Gunakan huruf kecil dan underscore. Contoh: zikir_pagi, doa_tahlil</p>
+                </div>
 
+                <!-- Label -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Label / Nama Menu</label>
+                  <input type="text" v-model="form.label" required
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
+                    placeholder="Contoh: Zikir Pagi" />
+                </div>
 
-              <!-- Label -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Label / Nama Menu</label>
-                <input type="text" v-model="form.label" required
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
-                  placeholder="Contoh: Zikir Pagi" />
-              </div>
+                <!-- Deskripsi -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Deskripsi Singkat</label>
+                  <input type="text" v-model="form.description" required
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
+                    placeholder="Contoh: Bacaan zikir pagi hari sesuai sunnah" />
+                </div>
 
-              <!-- Deskripsi -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Deskripsi Singkat</label>
-                <input type="text" v-model="form.description" required
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
-                  placeholder="Contoh: Bacaan zikir pagi hari sesuai sunnah" />
-              </div>
+                <!-- Icon Lucide Dropdown -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Icon Lucide</label>
+                  <select v-model="form.icon" required
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500">
+                    <option value="lucide:book-marked">📚 Book Marked (lucide:book-marked)</option>
+                    <option value="lucide:sun">☀️ Sun (lucide:sun)</option>
+                    <option value="lucide:book-open">📖 Book Open (lucide:book-open)</option>
+                    <option value="lucide:sunrise">🌅 Sunrise (lucide:sunrise)</option>
+                    <option value="lucide:moon">🌙 Moon (lucide:moon)</option>
+                  </select>
+                </div>
 
-              <!-- Icon Lucide Dropdown -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Icon Lucide</label>
-                <select v-model="form.icon" required
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500">
-                  <option value="lucide:book-marked">📚 Book Marked (lucide:book-marked)</option>
-                  <option value="lucide:sun">☀️ Sun (lucide:sun)</option>
-                  <option value="lucide:book-open">📖 Book Open (lucide:book-open)</option>
-                  <option value="lucide:sunrise">🌅 Sunrise (lucide:sunrise)</option>
-                  <option value="lucide:moon">🌙 Moon (lucide:moon)</option>
-                </select>
-              </div>
+                <!-- Next Menu (Optional) -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Menu Selanjutnya (Optional)</label>
+                  <input type="text" v-model="form.next"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
+                    placeholder="Contoh: doa-setelah-shalat" />
+                </div>
+              </template>
 
-              <!-- Next Menu (Optional) -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Menu Selanjutnya (Optional)</label>
-                <input type="text" v-model="form.next"
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
-                  placeholder="Contoh: doa-setelah-shalat" />
-              </div>
+              <!-- Inputs for standard zikir -->
+              <template v-else>
+                <!-- Sub Menu -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Sub Menu (opsional)</label>
+                  <input type="text" v-model="form.sub_menu"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
+                    placeholder="Contoh: Fatihah-fatihah" />
+                </div>
+
+                <!-- Teks Arab -->
+                <div>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Teks Arab (arab)</label>
+                    <button type="button" @click="runRowAssist" :disabled="isAssisting || (!form.arab && !form.terjemah)"
+                      class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50">
+                      <Icon v-if="isAssisting" name="lucide:loader-2" class="w-3.5 h-3.5 animate-spin" />
+                      <Icon v-else name="lucide:sparkles" class="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Koreksi & Selaraskan dengan AI</span>
+                    </button>
+                  </div>
+                  <textarea v-model="form.arab" required rows="3" style="direction: rtl;"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-850 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 text-right font-hafs text-lg leading-relaxed"
+                    placeholder="بِسْمِ اللّٰهِ..."></textarea>
+                </div>
+
+                <!-- Terjemah -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Terjemahan (terjemah)</label>
+                  <textarea v-model="form.terjemah" required rows="3"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 text-sm"
+                    placeholder="Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang..."></textarea>
+                </div>
+              </template>
             </template>
 
-            <!-- Inputs for standard zikir -->
-            <template v-else>
-              <!-- Sub Menu -->
+            <!-- Bagian AI Generator (Hanya tampil jika add mode, zikir table, dan tab AI) -->
+            <template v-else-if="!isEditMode && selectedTable !== 'menu_config' && activeAddTab === 'ai'">
+              <!-- Tema zikir -->
               <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Sub Menu (opsional)</label>
-                <input type="text" v-model="form.sub_menu"
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500"
-                  placeholder="Contoh: Fatihah-fatihah" />
-              </div>
-
-              <!-- Teks Arab -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Teks Arab (arab)</label>
-                <textarea v-model="form.arab" required rows="3" style="direction: rtl;"
-                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 text-right font-hafs text-lg leading-relaxed"
-                  placeholder="بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ"></textarea>
-              </div>
-
-              <!-- Terjemah -->
-              <div>
-                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Terjemahan (terjemah)</label>
-                <textarea v-model="form.terjemah" required rows="3"
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Topik / Tema Zikir</label>
+                <input type="text" v-model="aiGenerateTopic"
                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 text-sm"
-                  placeholder="Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang..."></textarea>
+                  placeholder="Contoh: Zikir memohon perlindungan di sore hari" />
+              </div>
+
+              <!-- Instruksi tambahan -->
+              <div>
+                <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Instruksi Khusus untuk AI (Opsional)</label>
+                <textarea v-model="aiGenerateInstructions" rows="2"
+                  class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500 text-xs"
+                  placeholder="Contoh: Sertakan minimal 5 zikir yang shahih beserta riwayatnya..."></textarea>
+              </div>
+
+              <!-- Button to trigger generate -->
+              <div class="flex justify-end">
+                <button type="button" @click="generateZikirWithAI" :disabled="isGeneratingAI || !aiGenerateTopic"
+                  class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 cursor-pointer disabled:opacity-50">
+                  <Icon v-if="isGeneratingAI" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                  <Icon v-else name="lucide:sparkles" class="w-4 h-4" />
+                  <span>{{ isGeneratingAI ? 'Sedang Memproses AI...' : 'Hasilkan Zikir' }}</span>
+                </button>
+              </div>
+
+              <!-- Preview Table of generated items -->
+              <div v-if="aiPreviewItems.length > 0" class="space-y-3 pt-4 border-t border-gray-150 dark:border-gray-800">
+                <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200">Tinjau Hasil Zikir (Bisa Diedit):</h4>
+                
+                <div class="max-h-[300px] overflow-y-auto space-y-4 pr-1">
+                  <div v-for="(item, index) in aiPreviewItems" :key="index" 
+                    class="p-4 bg-gray-50 dark:bg-gray-800/30 border border-gray-150 dark:border-gray-800 rounded-xl space-y-3 relative">
+                    
+                    <!-- Remove item button -->
+                    <button type="button" @click="removePreviewItem(index)"
+                      class="absolute top-2 right-2 p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
+                      title="Hapus baris ini">
+                      <Icon name="lucide:trash-2" class="w-4 h-4" />
+                    </button>
+
+                    <!-- Sub Menu & No -->
+                    <div class="grid grid-cols-3 gap-2">
+                      <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">No</label>
+                        <input type="number" v-model.number="item.no" required
+                          class="w-full px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs focus:outline-none focus:border-emerald-500" />
+                      </div>
+                      <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Sub Menu</label>
+                        <input type="text" v-model="item.sub_menu"
+                          class="w-full px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs focus:outline-none focus:border-emerald-500" />
+                      </div>
+                    </div>
+
+                    <!-- Arab -->
+                    <div>
+                      <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Teks Arab</label>
+                      <textarea v-model="item.arab" rows="2" style="direction: rtl;"
+                        class="w-full px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-right font-hafs leading-relaxed focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+
+                    <!-- Terjemah -->
+                    <div>
+                      <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Terjemahan</label>
+                      <textarea v-model="item.terjemah" rows="2"
+                        class="w-full px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+                  </div>
+                </div>
               </div>
             </template>
 
@@ -372,7 +470,18 @@
                 class="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-bold cursor-pointer">
                 Batal
               </button>
-              <button type="submit" :disabled="isSubmitting"
+              
+              <!-- Batch Save for AI Tab -->
+              <button v-if="!isEditMode && selectedTable !== 'menu_config' && activeAddTab === 'ai'"
+                type="button" @click="submitFormBatch" :disabled="isSubmitting || aiPreviewItems.length === 0"
+                class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 disabled:opacity-50 cursor-pointer">
+                <div v-if="isSubmitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Simpan ke Spreadsheet</span>
+              </button>
+              
+              <!-- Standard Save -->
+              <button v-else
+                type="submit" :disabled="isSubmitting"
                 class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 disabled:opacity-50 cursor-pointer">
                 <div v-if="isSubmitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 <span>Simpan</span>
@@ -430,11 +539,39 @@ const loginPassword = ref('');
 const loginError = ref('');
 const isLoggingIn = ref(false);
 
+// Dynamic Menu list from Google Sheets (menu_config)
+const dynamicMenuList = ref([]);
+
+// Fetch menu_config from API to populate tables list dynamically
+const fetchMenuList = async () => {
+  try {
+    const response = await fetch('/api/zikir?table=menu_config', {
+      headers: {
+        'x-admin-password': sessionStorage.getItem('admin_password') || ''
+      }
+    });
+    if (response.ok) {
+      const result = await response.json();
+      if (result.status === 'success' && Array.isArray(result.data)) {
+        dynamicMenuList.value = result.data;
+      }
+    }
+  } catch (err) {
+    console.error('Gagal memuat daftar menu dinamis:', err);
+  }
+};
+
 // Tables available
 const tablesList = computed(() => {
+  const list = [
+    { apiKey: 'menu_config', label: 'Konfigurasi Menu (menu_config)' }
+  ];
+  
+  const source = dynamicMenuList.value.length > 0 ? dynamicMenuList.value : menuList;
+  
   return [
-    { apiKey: 'menu_config', label: 'Konfigurasi Menu (menu_config)' },
-    ...menuList.map(t => ({
+    ...list,
+    ...source.map(t => ({
       apiKey: t.nama_sheet,
       label: t.label
     }))
@@ -500,6 +637,14 @@ const generateRandomKey = () => {
 const showDeleteModal = ref(false);
 const itemToDelete = ref(null);
 
+// Gemini AI State
+const activeAddTab = ref('manual');
+const aiGenerateTopic = ref('');
+const aiGenerateInstructions = ref('');
+const aiPreviewItems = ref([]);
+const isGeneratingAI = ref(false);
+const isAssisting = ref(false);
+
 // Trigger Alert
 const triggerAlert = (message, type = 'success') => {
   alertMessage.value = message;
@@ -533,6 +678,7 @@ const handleLogin = async () => {
     loginPassword.value = '';
     
     // Load data
+    await fetchMenuList();
     await fetchZikir();
   } catch (err) {
     loginError.value = err.message || 'Gagal memverifikasi kata sandi';
@@ -546,6 +692,7 @@ const handleLogout = () => {
   sessionStorage.removeItem('admin_password');
   isAuthenticated.value = false;
   zikirData.value = [];
+  dynamicMenuList.value = [];
 };
 
 // Fetch data
@@ -591,6 +738,12 @@ const handleTableChange = () => {
 // Open Form Add
 const openAddModal = () => {
   isEditMode.value = false;
+  
+  activeAddTab.value = 'manual';
+  aiGenerateTopic.value = '';
+  aiGenerateInstructions.value = '';
+  aiPreviewItems.value = [];
+
   // Auto increment no based on current length
   const nextNo = zikirData.value.length > 0 
     ? Math.max(...zikirData.value.map(item => item.no)) + 1 
@@ -627,7 +780,7 @@ const openEditModal = (item) => {
   showFormModal.value = true;
 };
 
-// Submit Add / Edit Form
+// Submit Add / Edit Form (Untuk mode Manual)
 const submitForm = async () => {
   isSubmitting.value = true;
   const action = isEditMode.value ? 'update' : 'create';
@@ -670,7 +823,7 @@ const submitForm = async () => {
     }
 
     if (!response.ok) {
-      throw new Error('Gagal mengirim permintaan ke server');
+      throw new Error('Gagal mengirim data ke server');
     }
 
     const result = await response.json();
@@ -682,8 +835,11 @@ const submitForm = async () => {
       // Clear cache local storage
       if (import.meta.client) {
         localStorage.removeItem(`zikir_cache_${selectedTable.value}`);
-        // Clear index menu cache too
         localStorage.removeItem(`zikir_cache_menu_config`);
+      }
+      
+      if (selectedTable.value === 'menu_config') {
+        await fetchMenuList();
       }
       
       // Reload list
@@ -695,6 +851,145 @@ const submitForm = async () => {
     triggerAlert(err.message || 'Gagal menyimpan data', 'error');
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+// Menghasilkan zikir massal menggunakan AI
+const generateZikirWithAI = async () => {
+  isGeneratingAI.value = true;
+  try {
+    const response = await fetch('/api/generate-zikir', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-password': sessionStorage.getItem('admin_password') || ''
+      },
+      body: JSON.stringify({
+        mode: 'generate',
+        label: aiGenerateTopic.value,
+        instructions: aiGenerateInstructions.value
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.statusMessage || 'Gagal menghasilkan data zikir dari AI');
+    }
+
+    const result = await response.json();
+    if (result.status === 'success' && Array.isArray(result.data)) {
+      // Offset nomor urut berdasarkan nomor zikir terbesar di tabel saat ini
+      const maxNo = zikirData.value.length > 0 
+        ? Math.max(...zikirData.value.map(item => item.no)) 
+        : 0;
+
+      aiPreviewItems.value = result.data.map((item, idx) => ({
+        no: item.no ? item.no + maxNo : idx + 1 + maxNo,
+        sub_menu: item.sub_menu || '',
+        arab: item.arab || '',
+        terjemah: item.terjemah || ''
+      }));
+      triggerAlert('Daftar zikir berhasil di-generate. Silakan tinjau dan edit sebelum menyimpan.', 'success');
+    } else {
+      throw new Error('Format output dari Gemini AI tidak sesuai');
+    }
+  } catch (err) {
+    triggerAlert(err.message || 'Gagal generate zikir', 'error');
+  } finally {
+    isGeneratingAI.value = false;
+  }
+};
+
+// Menghapus baris tinjauan AI sebelum disimpan
+const removePreviewItem = (index) => {
+  aiPreviewItems.value.splice(index, 1);
+};
+
+// Menyimpan banyak baris zikir sekaligus ke Google Spreadsheet
+const submitFormBatch = async () => {
+  isSubmitting.value = true;
+  try {
+    const response = await fetch('/api/zikir', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-password': sessionStorage.getItem('admin_password') || ''
+      },
+      body: JSON.stringify({
+        action: 'create_batch',
+        table: selectedTable.value,
+        items: aiPreviewItems.value
+      })
+    });
+
+    if (response.status === 401) {
+      sessionStorage.removeItem('admin_password');
+      isAuthenticated.value = false;
+      throw new Error('Sesi telah berakhir atau kata sandi tidak valid');
+    }
+
+    if (!response.ok) {
+      throw new Error('Gagal menyimpan data batch ke server');
+    }
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      triggerAlert(result.message || 'Batch data berhasil disimpan', 'success');
+      showFormModal.value = false;
+      
+      // Clear cache local storage
+      if (import.meta.client) {
+        localStorage.removeItem(`zikir_cache_${selectedTable.value}`);
+      }
+      
+      // Reload list
+      await fetchZikir();
+    } else {
+      throw new Error(result.message || 'Gagal menyimpan batch data');
+    }
+  } catch (err) {
+    triggerAlert(err.message || 'Gagal menyimpan data', 'error');
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// Membantu mengoreksi ejaan arab & terjemah untuk satu baris data zikir
+const runRowAssist = async () => {
+  isAssisting.value = true;
+  try {
+    const response = await fetch('/api/generate-zikir', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-password': sessionStorage.getItem('admin_password') || ''
+      },
+      body: JSON.stringify({
+        mode: 'assist',
+        arab: form.value.arab,
+        terjemah: form.value.terjemah,
+        sub_menu: form.value.sub_menu
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.statusMessage || 'Gagal memproses asisten AI');
+    }
+
+    const result = await response.json();
+    if (result.status === 'success' && result.data) {
+      form.value.arab = result.data.arab || form.value.arab;
+      form.value.terjemah = result.data.terjemah || form.value.terjemah;
+      form.value.sub_menu = result.data.sub_menu || form.value.sub_menu;
+      triggerAlert('Teks zikir berhasil diselaraskan dan dikoreksi oleh AI', 'success');
+    } else {
+      throw new Error('Respons format asisten AI tidak valid');
+    }
+  } catch (err) {
+    triggerAlert(err.message || 'Gagal koreksi zikir', 'error');
+  } finally {
+    isAssisting.value = false;
   }
 };
 
@@ -745,6 +1040,10 @@ const deleteItem = async () => {
         localStorage.removeItem(`zikir_cache_menu_config`);
       }
       
+      if (selectedTable.value === 'menu_config') {
+        await fetchMenuList();
+      }
+      
       // Reload list
       await fetchZikir();
     } else {
@@ -772,6 +1071,7 @@ onMounted(async () => {
       });
       if (response.ok) {
         isAuthenticated.value = true;
+        await fetchMenuList();
         await fetchZikir();
       } else {
         sessionStorage.removeItem('admin_password');

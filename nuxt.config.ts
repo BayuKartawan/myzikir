@@ -36,6 +36,7 @@ export default defineNuxtConfig({
         apiBaseUrl: process.env.VITE_API_URL || '',
         apiSecretKey: process.env.API_SECRET_KEY || '',
         adminPassword: process.env.ADMIN_PASSWORD || '',
+        geminiApiKey: process.env.GEMINI_API_KEY || '',
 
         // Keys within public are also exposed client-side
         public: {}
