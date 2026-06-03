@@ -3,9 +3,7 @@
     <!-- Header Section -->
     <div class="max-w-2xl mx-auto px-4 pt-6 sm:pt-10 pb-4">
       <div class="flex items-center gap-3.5 mb-8">
-        <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl">
-          <Icon name="lucide:sparkles" class="text-2xl text-emerald-600 dark:text-emerald-400" />
-        </div>
+        <img src="/logo-app.jpeg" class="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-150 dark:border-gray-800" alt="Logo MyZikir" />
         <div>
           <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
             Menu Al-Adzkar

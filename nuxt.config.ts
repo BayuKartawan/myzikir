@@ -10,6 +10,15 @@ export default defineNuxtConfig({
         compatibilityVersion: 4,
     },
 
+    app: {
+        head: {
+            link: [
+                { rel: 'icon', type: 'image/jpeg', href: '/logo-app.jpeg' },
+                { rel: 'sitemap', type: 'application/xml', title: 'Sitemap', href: '/sitemap.xml' }
+            ]
+        }
+    },
+
     devtools: { enabled: true },
 
     modules: ['@nuxt/icon'],
