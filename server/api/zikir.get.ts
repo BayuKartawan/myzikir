@@ -1,5 +1,6 @@
 import { defineEventHandler, getQuery, createError, getHeader } from 'h3'
 import type { H3Event } from 'h3'
+import { getZikirCache, setZikirCache } from '../utils/cache'
 
 // Interface untuk data dari Google Apps Script
 interface GoogleApiResponse {
@@ -38,18 +39,24 @@ export default defineEventHandler(async (event: H3Event): Promise<LocalApiRespon
     }
 
     try {
-        // Memanggil API eksternal dengan tipe eksplisit dan menyertakan secret key
-        const targetUrl = config.apiSecretKey
-            ? `${config.apiBaseUrl}?secret=${encodeURIComponent(config.apiSecretKey)}`
-            : config.apiBaseUrl
+        let response = getZikirCache()
 
-        const response = await $fetch<GoogleApiResponse>(targetUrl)
+        if (!response) {
+            // Memanggil API eksternal dengan tipe eksplisit dan menyertakan secret key
+            const targetUrl = config.apiSecretKey
+                ? `${config.apiBaseUrl}?secret=${encodeURIComponent(config.apiSecretKey)}`
+                : config.apiBaseUrl
 
-        if (response.status !== 'success') {
-            throw createError({
-                statusCode: 400,
-                statusMessage: 'Gagal mendapatkan data sukses dari pusat',
-            })
+            response = await $fetch<GoogleApiResponse>(targetUrl)
+
+            if (response.status !== 'success') {
+                throw createError({
+                    statusCode: 400,
+                    statusMessage: 'Gagal mendapatkan data sukses dari pusat',
+                })
+            }
+
+            setZikirCache(response)
         }
 
         // Jika ada parameter table, kita filter datanya di sini

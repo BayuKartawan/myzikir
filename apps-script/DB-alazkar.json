@@ -2,16 +2,16 @@
   "menu_config": [
     {
       "no": 1,
-      "key": "z7s9p2w8",
+      "key": "zikir-setelah-shalat",
       "nama_sheet": "zikir_setelah_shalat",
       "label": "Zikir Setelah Shalat",
       "description": "Bacaan zikir setelah melaksanakan shalat fardhu",
       "icon": "lucide:book-marked",
-      "next": "d3s7q1x5"
+      "next": "doa-setelah-shalat"
     },
     {
       "no": 2,
-      "key": "d3s7q1x5",
+      "key": "doa-setelah-shalat",
       "nama_sheet": "doa_setelah_shalat",
       "label": "Doa Setelah Shalat",
       "description": "Bacaan doa setelah melaksanakan shalat fardhu",
@@ -19,16 +19,16 @@
     },
     {
       "no": 3,
-      "key": "t9h2m6b4",
+      "key": "tahlil",
       "nama_sheet": "tahlil",
       "label": "Tahlil",
       "description": "Bacaan tahlil",
       "icon": "lucide:book-open",
-      "next": "d4t8k2y7"
+      "next": "doa-tahlil"
     },
     {
       "no": 4,
-      "key": "d4t8k2y7",
+      "key": "doa-tahlil",
       "nama_sheet": "doa_tahlil",
       "label": "Doa Tahlil",
       "description": "Bacaan doa tahlil",
@@ -36,7 +36,7 @@
     },
     {
       "no": 5,
-      "key": "t5b7r9w2",
+      "key": "takbiran",
       "nama_sheet": "takbiran",
       "label": "Takbir Hari Raya",
       "description": "Bacaan takbir hari raya",

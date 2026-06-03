@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody, getHeader, createError } from 'h3'
 import type { H3Event } from 'h3'
+import { clearZikirCache } from '../utils/cache'
 
 export default defineEventHandler(async (event: H3Event) => {
     const config = useRuntimeConfig()
@@ -44,6 +45,10 @@ export default defineEventHandler(async (event: H3Event) => {
                 'Content-Type': 'application/json'
             }
         })
+
+        if (response && response.status === 'success') {
+            clearZikirCache()
+        }
 
         return response
     } catch (error: any) {

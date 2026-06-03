@@ -10,11 +10,14 @@
     <!-- Loading State (Skeleton Loader) -->
     <div v-if="isLoading" class="space-y-4">
       <!-- Header Skeleton -->
-      <div class="bg-white dark:bg-gray-900 border-b border-gray-150 dark:border-gray-800 py-8 sm:py-10">
-        <div class="max-w-4xl mx-auto px-4 text-center space-y-4">
-          <div class="inline-flex w-16 h-16 bg-gray-150 dark:bg-gray-800 rounded-2xl mx-auto"></div>
-          <div class="h-8 bg-gray-200 dark:bg-gray-700 w-48 rounded-lg mx-auto"></div>
-          <div class="h-4 bg-gray-150 dark:bg-gray-850 w-72 rounded-md mx-auto"></div>
+      <div class="bg-white dark:bg-gray-900 border-b border-gray-150 dark:border-gray-800 py-3 sm:py-4">
+        <div class="max-w-4xl mx-auto px-4 flex items-center gap-3">
+          <div class="w-9 h-9 bg-gray-150 dark:bg-gray-850 rounded-xl"></div>
+          <div class="w-9 h-9 bg-gray-150 dark:bg-gray-850 rounded-xl"></div>
+          <div class="space-y-2">
+            <div class="h-4 bg-gray-200 dark:bg-gray-750 w-32 rounded-md"></div>
+            <div class="h-3 bg-gray-150 dark:bg-gray-850 w-48 rounded-sm"></div>
+          </div>
         </div>
       </div>
       <!-- Cards Skeletons -->
@@ -35,35 +38,13 @@
       <!-- Header -->
       <Header :icon="icon" :title="title" :subtitle="subtitle">
         <template #back-button>
-          <div class="mb-6 flex w-full justify-between items-center">
-            <NuxtLink to="/">
-              <Button text="Kembali">
-                <template #icon>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </template>
-              </Button>
-            </NuxtLink>
-            <div class="flex gap-2">
-              <Button text="Cetak" @click="printData">
-                <template #icon>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                </template>
-              </Button>
-              <Button text="Excel" @click="showDownloadExcelModal = true">
-                <template #icon>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </template>
-              </Button>
-            </div>
-          </div>
+          <NuxtLink to="/" class="flex-shrink-0">
+            <button class="flex items-center justify-center w-9 h-9 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl transition-colors border border-gray-150 dark:border-gray-800/50">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </NuxtLink>
         </template>
       </Header>
 
@@ -258,39 +239,11 @@
       </div>
     </div>
 
-    <!-- Download Excel Modal -->
-    <div v-if="showDownloadExcelModal"
-      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-      @click="showDownloadExcelModal = false">
-      <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full border border-gray-200 dark:border-gray-800 text-center"
-        @click.stop>
-        <div
-          class="w-20 h-20 bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="lucide:file-spreadsheet" class="w-10 h-10 text-emerald-500" />
-        </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Download Excel</h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-8">
-          Apakah Anda ingin mengunduh data "{{ title }}" dalam format Microsoft Excel (.xlsx)?
-        </p>
 
-        <div class="flex flex-col gap-3">
-          <button @click="downloadExcel"
-            class="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2">
-            <Icon name="lucide:download" class="w-5 h-5" />
-            Download Sekarang
-          </button>
-          <button @click="showDownloadExcelModal = false"
-            class="w-full px-6 py-3 bg-gray-150 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-bold">
-            Batal
-          </button>
-        </div>
-      </div>
-    </div>
   </PageContainer>
 </template>
 
 <script setup>
-import { availableTables } from '~/utils/menu';
 
 const route = useRoute();
 
@@ -306,14 +259,14 @@ const arabSize = ref('text-3xl sm:text-5xl');
 const translationSize = ref('text-base sm:text-lg');
 const showSettingsModal = ref(false);
 const showNavigationModal = ref(false);
-const showDownloadExcelModal = ref(false);
+
 const showMenu = ref(false);
 const isFullscreen = ref(false);
 const isAutoScrolling = ref(false);
 let autoScrollInterval = null;
 
-// Computed for active menu list (fallback to static availableTables)
-const activeMenuList = ref([...availableTables]);
+// Computed for active menu list (loaded dynamically)
+const activeMenuList = ref([]);
 
 // Computed for sub-menus
 const subMenus = computed(() => {
@@ -433,53 +386,7 @@ const handleFullscreenChange = () => {
   isFullscreen.value = !!document.fullscreenElement;
 };
 
-// Print data
-const printData = () => {
-  const printWindow = window.open('', '_blank');
-  const html = `
-    <html>
-      <head>
-        <title>${title.value}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .item { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-          .arab { font-size: 24px; direction: rtl; text-align: right; }
-          .translation { font-size: 16px; margin-top: 10px; }
-        </style>
-      </head>
-      <body>
-        <h1>${title.value}</h1>
-        <p>${subtitle.value}</p>
-        ${zikirData.value.map(item => `
-          ${item.sub_menu ? `<h2 style="margin-top: 30px; color: #059669; border-bottom: 2px solid #059669;">${item.sub_menu}</h2>` : ''}
-          <div class="item">
-            <div class="arab">${item.arab}</div>
-            <div class="translation">${item.terjemah}</div>
-          </div>
-        `).join('')}
-      </body>
-    </html>
-  `;
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.print();
-};
 
-// Download Excel
-const downloadExcel = async () => {
-  const XLSX = await import('xlsx/xlsx.mjs');
-  const data = zikirData.value.map(item => ({
-    No: item.no,
-    'Sub Menu': item.sub_menu || '',
-    Arab: item.arab,
-    Terjemah: item.terjemah
-  }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Zikir');
-  XLSX.writeFile(wb, `${title.value}.xlsx`);
-  showDownloadExcelModal.value = false;
-};
 
 // Load menu configuration (sync cache first, then background refresh)
 const loadMenuFromCache = () => {
@@ -575,6 +482,7 @@ const fetchData = async (tableKey) => {
     zikirData.value = [];
     isLoading.value = true;
   } else {
+    isLoading.value = false;
     isRefreshing.value = true;
   }
 
@@ -653,7 +561,6 @@ watch(() => route.params.table, async (newTable) => {
     }
 
     const sheetToFetch = selectedTableInfo ? selectedTableInfo.nama_sheet : newTable.replace(/-/g, '_');
-    isLoading.value = true;
     await fetchData(sheetToFetch);
     // Reset expanded cards and scroll to top when changing menu
     expandedCards.value = new Set();

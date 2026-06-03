@@ -50,18 +50,18 @@
     <!-- Admin Panel View -->
     <div v-else class="min-h-screen bg-slate-50 dark:bg-gray-950 pb-20">
       <!-- Admin Header -->
-      <div class="bg-white dark:bg-gray-900 border-b border-gray-150 dark:border-gray-800 py-6">
-        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <div class="bg-white dark:bg-gray-900 border-b border-gray-150 dark:border-gray-800 py-4 sm:py-6">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:items-start lg:items-center gap-4">
+          <div class="text-center md:text-left">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-2">
               <Icon name="lucide:settings-2" class="text-emerald-500" />
               Panel Admin MyZikir
             </h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola data zikir dan doa pada Google Spreadsheet</p>
+            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola data zikir dan doa pada Google Spreadsheet</p>
           </div>
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center justify-center gap-2">
             <button @click="handleLogout"
-              class="px-4 py-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-755 dark:text-gray-200 rounded-xl font-bold flex items-center gap-2 cursor-pointer">
+              class="px-3 py-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm">
               Keluar
             </button>
             <NuxtLink to="/">
@@ -83,7 +83,7 @@
           <!-- Selector and Add Button -->
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-gray-150 dark:border-gray-800">
             <div class="w-full sm:w-auto flex items-center gap-3">
-              <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Pilih Tabel:</label>
+              <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap hidden xs:block">Pilih Tabel:</label>
               <select v-model="selectedTable" @change="handleTableChange"
                 class="w-full sm:w-64 px-3 py-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-emerald-500">
                 <option v-for="table in tablesList" :key="table.apiKey" :value="table.apiKey">
@@ -91,11 +91,23 @@
                 </option>
               </select>
             </div>
-            <button @click="openAddModal"
-              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 cursor-pointer">
-              <Icon name="lucide:plus" class="w-4 h-4" />
-              Tambah Data
-            </button>
+            <div class="w-full sm:w-auto grid grid-cols-3 sm:flex sm:flex-wrap gap-2 items-center">
+              <button @click="printData" :disabled="zikirData.length === 0"
+                class="w-full sm:w-auto px-2 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm">
+                <Icon name="lucide:printer" class="w-4 h-4 text-emerald-500" />
+                Cetak
+              </button>
+              <button @click="showDownloadExcelModal = true" :disabled="zikirData.length === 0"
+                class="w-full sm:w-auto px-2 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm">
+                <Icon name="lucide:file-spreadsheet" class="w-4 h-4 text-emerald-500" />
+                Excel
+              </button>
+              <button @click="openAddModal"
+                class="w-full sm:w-auto px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer text-xs sm:text-sm">
+                <Icon name="lucide:plus" class="w-4 h-4" />
+                Tambah
+              </button>
+            </div>
           </div>
 
           <!-- Feedback Alert -->
@@ -127,117 +139,203 @@
               <Icon name="lucide:search" class="text-4xl mb-2" />
               <p>Tidak ada data di tabel ini.</p>
             </div>
+            <div v-else>
+              <!-- Desktop View (Tables) -->
+              <div class="hidden sm:block overflow-x-auto">
+                <!-- menu_config table -->
+                <table v-if="selectedTable === 'menu_config'" class="w-full border-collapse text-left">
+                  <thead>
+                    <tr class="border-b border-gray-150 dark:border-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">
+                      <th class="py-3 px-4 w-16">No</th>
+                      <th class="py-3 px-4 w-40">Nama Sheet</th>
+                      <th class="py-3 px-4 w-48">Label</th>
+                      <th class="py-3 px-4">Deskripsi</th>
+                      <th class="py-3 px-4 w-32">Icon</th>
+                      <th class="py-3 px-4 w-24 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-150 dark:divide-gray-800">
+                    <tr v-for="item in paginatedZikirData" :key="item.no" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
+                      <td class="py-4 px-4 font-semibold text-gray-900 dark:text-white">
+                        <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-xs">
+                          {{ item.no }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-4 text-xs font-medium text-gray-700 dark:text-gray-300">
+                        {{ item.nama_sheet }}
+                      </td>
+                      <td class="py-4 px-4 text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ item.label }}
+                      </td>
+                      <td class="py-4 px-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" :title="item.description">
+                        {{ item.description }}
+                      </td>
+                      <td class="py-4 px-4 text-xs">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                          <Icon :name="item.icon || 'lucide:book-open'" class="w-4 h-4 text-emerald-500" />
+                          {{ item.icon }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-4 text-right whitespace-nowrap">
+                        <div class="inline-flex gap-2">
+                          <button @click="openEditModal(item)"
+                            class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded cursor-pointer"
+                            title="Edit">
+                            <Icon name="lucide:edit-2" class="w-4 h-4" />
+                          </button>
+                          <button @click="confirmDelete(item)"
+                            class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
+                            title="Hapus">
+                            <Icon name="lucide:trash-2" class="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
 
-            <div v-else class="overflow-x-auto">
-              <!-- menu_config table -->
-              <table v-if="selectedTable === 'menu_config'" class="w-full border-collapse text-left">
-                <thead>
-                  <tr class="border-b border-gray-150 dark:border-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">
-                    <th class="py-3 px-4 w-16">No</th>
-                    <th class="py-3 px-4 w-40">Nama Sheet</th>
-                    <th class="py-3 px-4 w-48">Label</th>
-                    <th class="py-3 px-4">Deskripsi</th>
-                    <th class="py-3 px-4 w-32">Icon</th>
-                    <th class="py-3 px-4 w-24 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-150 dark:divide-gray-800">
-                  <tr v-for="item in paginatedZikirData" :key="item.no" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
-                    <td class="py-4 px-4 font-semibold text-gray-900 dark:text-white">
-                      <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-xs">
-                        {{ item.no }}
+                <!-- standard zikir table -->
+                <table v-else class="w-full border-collapse text-left">
+                  <thead>
+                    <tr class="border-b border-gray-150 dark:border-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">
+                      <th class="py-3 px-4 w-16">No</th>
+                      <th class="py-3 px-4 w-36">Sub Menu</th>
+                      <th class="py-3 px-4">Teks Arab</th>
+                      <th class="py-3 px-4">Terjemahan</th>
+                      <th class="py-3 px-4 w-24 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-150 dark:divide-gray-800">
+                    <tr v-for="item in paginatedZikirData" :key="item.no" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
+                      <td class="py-4 px-4 font-semibold text-gray-900 dark:text-white">
+                        <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-xs">
+                          {{ item.no }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-4 text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ item.sub_menu || '-' }}
+                      </td>
+                      <td class="py-4 px-4 font-hafs text-right text-lg text-gray-900 dark:text-white leading-relaxed dir-rtl" style="direction: rtl;">
+                        {{ item.arab }}
+                      </td>
+                      <td class="py-4 px-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" :title="item.terjemah">
+                        {{ item.terjemah }}
+                      </td>
+                      <td class="py-4 px-4 text-right whitespace-nowrap">
+                        <div class="inline-flex gap-2">
+                          <button @click="openEditModal(item)"
+                            class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded cursor-pointer"
+                            title="Edit">
+                            <Icon name="lucide:edit-2" class="w-4 h-4" />
+                          </button>
+                          <button @click="confirmDelete(item)"
+                            class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
+                            title="Hapus">
+                            <Icon name="lucide:trash-2" class="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile View (Cards) -->
+              <div class="block sm:hidden space-y-3">
+                <!-- menu_config cards -->
+                <template v-if="selectedTable === 'menu_config'">
+                  <div v-for="item in paginatedZikirData" :key="item.no" 
+                    class="p-4 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl space-y-3 shadow-sm relative">
+                    <div class="flex items-center justify-between">
+                      <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                        #{{ item.no }}
                       </span>
-                    </td>
-                    <td class="py-4 px-4 text-xs font-medium text-gray-700 dark:text-gray-300">
-                      {{ item.nama_sheet }}
-                    </td>
-                    <td class="py-4 px-4 text-sm font-semibold text-gray-900 dark:text-white">
-                      {{ item.label }}
-                    </td>
-                    <td class="py-4 px-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" :title="item.description">
-                      {{ item.description }}
-                    </td>
-                    <td class="py-4 px-4 text-xs">
-                      <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
-                        <Icon :name="item.icon || 'lucide:book-open'" class="w-4 h-4 text-emerald-500" />
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-50 dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-lg text-[10px] text-gray-600 dark:text-gray-400">
+                        <Icon :name="item.icon || 'lucide:book-open'" class="w-3.5 h-3.5 text-emerald-500" />
                         {{ item.icon }}
                       </span>
-                    </td>
-                    <td class="py-4 px-4 text-right whitespace-nowrap">
-                      <div class="inline-flex gap-2">
-                        <button @click="openEditModal(item)"
-                          class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded cursor-pointer"
-                          title="Edit">
-                          <Icon name="lucide:edit-2" class="w-4 h-4" />
-                        </button>
-                        <button @click="confirmDelete(item)"
-                          class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
-                          title="Hapus">
-                          <Icon name="lucide:trash-2" class="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+                    
+                    <div class="space-y-1">
+                      <div class="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Label / Sheet</div>
+                      <div class="text-sm font-bold text-gray-900 dark:text-white">{{ item.label }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ item.nama_sheet }}</div>
+                    </div>
 
-              <!-- standard zikir table -->
-              <table v-else class="w-full border-collapse text-left">
-                <thead>
-                  <tr class="border-b border-gray-150 dark:border-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">
-                    <th class="py-3 px-4 w-16">No</th>
-                    <th class="py-3 px-4 w-36">Sub Menu</th>
-                    <th class="py-3 px-4">Teks Arab</th>
-                    <th class="py-3 px-4">Terjemahan</th>
-                    <th class="py-3 px-4 w-24 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-150 dark:divide-gray-800">
-                  <tr v-for="item in paginatedZikirData" :key="item.no" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
-                    <td class="py-4 px-4 font-semibold text-gray-900 dark:text-white">
-                      <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-xs">
-                        {{ item.no }}
+                    <div class="space-y-1">
+                      <div class="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500">Deskripsi</div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed font-light">{{ item.description || '-' }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                      <button @click="openEditModal(item)"
+                        class="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg font-bold flex items-center gap-1 cursor-pointer text-xs">
+                        <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      <button @click="confirmDelete(item)"
+                        class="px-3 py-1.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-bold flex items-center gap-1 cursor-pointer text-xs">
+                        <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- standard zikir cards -->
+                <template v-else>
+                  <div v-for="item in paginatedZikirData" :key="item.no" 
+                    class="p-4 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between">
+                      <span class="inline-flex items-center justify-center w-7 h-5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                        #{{ item.no }}
                       </span>
-                    </td>
-                    <td class="py-4 px-4 text-xs font-medium text-gray-600 dark:text-gray-400">
-                      {{ item.sub_menu || '-' }}
-                    </td>
-                    <td class="py-4 px-4 font-hafs text-right text-lg text-gray-900 dark:text-white leading-relaxed dir-rtl" style="direction: rtl;">
+                      <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-0.5 rounded-lg">
+                        {{ item.sub_menu || '-' }}
+                      </span>
+                    </div>
+
+                    <!-- Arab Text -->
+                    <div class="font-hafs text-right text-lg text-gray-900 dark:text-white leading-relaxed dir-rtl py-1" style="direction: rtl;">
                       {{ item.arab }}
-                    </td>
-                    <td class="py-4 px-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" :title="item.terjemah">
-                      {{ item.terjemah }}
-                    </td>
-                    <td class="py-4 px-4 text-right whitespace-nowrap">
-                      <div class="inline-flex gap-2">
-                        <button @click="openEditModal(item)"
-                          class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded cursor-pointer"
-                          title="Edit">
-                          <Icon name="lucide:edit-2" class="w-4 h-4" />
-                        </button>
-                        <button @click="confirmDelete(item)"
-                          class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
-                          title="Hapus">
-                          <Icon name="lucide:trash-2" class="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+
+                    <!-- Translation -->
+                    <div class="space-y-1 bg-gray-50/50 dark:bg-gray-950/20 p-2.5 rounded-xl border border-gray-150 dark:border-gray-800/50">
+                      <div class="text-[9px] uppercase font-bold text-gray-400 dark:text-gray-500">Terjemahan</div>
+                      <p class="text-xs text-gray-600 dark:text-gray-400 leading-normal font-light">{{ item.terjemah }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                      <button @click="openEditModal(item)"
+                        class="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg font-bold flex items-center gap-1 cursor-pointer text-xs">
+                        <Icon name="lucide:edit-2" class="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      <button @click="confirmDelete(item)"
+                        class="px-3 py-1.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-bold flex items-center gap-1 cursor-pointer text-xs">
+                        <Icon name="lucide:trash-2" class="w-3.5 h-3.5" />
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
             </div>
 
             <!-- Pagination Controls -->
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-gray-150 dark:border-gray-800 text-sm">
-              <div class="text-gray-500 dark:text-gray-400">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-gray-150 dark:border-gray-800 text-xs sm:text-sm w-full">
+              <!-- Text info -->
+              <div class="text-gray-500 dark:text-gray-400 text-center sm:text-left">
                 Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200">{{ startIndex }}</span> - 
                 <span class="font-bold text-gray-800 dark:text-gray-200">{{ endIndex }}</span> dari 
                 <span class="font-bold text-gray-800 dark:text-gray-200">{{ zikirData.length }}</span> data
               </div>
 
-              <div class="flex items-center gap-4">
+              <!-- Controls row -->
+              <div class="flex flex-row justify-between sm:justify-end items-center gap-4 w-full sm:w-auto">
                 <div class="flex items-center gap-2">
-                  <span class="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">Tampilkan:</span>
+                  <span class="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs whitespace-nowrap">Tampilkan:</span>
                   <select v-model="itemsPerPage" @change="currentPage = 1"
                     class="px-2 py-1 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg text-xs focus:outline-none focus:border-emerald-500">
                     <option :value="5">5</option>
@@ -248,19 +346,19 @@
                   </select>
                 </div>
 
-                <div class="inline-flex gap-2">
+                <div class="flex items-center gap-1">
                   <button @click="currentPage--" :disabled="currentPage === 1"
-                    class="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Sebelumnya
+                    class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Sebelum
                   </button>
 
-                  <span class="px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
-                    Halaman {{ currentPage }} / {{ totalPages }}
+                  <span class="px-2 py-1.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap text-center min-w-[60px]">
+                    {{ currentPage }} / {{ totalPages }}
                   </span>
 
                   <button @click="currentPage++" :disabled="currentPage === totalPages"
-                    class="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700">
-                    Berikutnya
+                    class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Berikut
                   </button>
                 </div>
               </div>
@@ -517,12 +615,40 @@
           </div>
         </div>
       </div>
+
+      <!-- Download Excel Modal -->
+      <div v-if="showDownloadExcelModal"
+        class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+        @click="showDownloadExcelModal = false">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full border border-gray-200 dark:border-gray-800 text-center"
+          @click.stop>
+          <div
+            class="w-20 h-20 bg-emerald-50 dark:bg-emerald-950/30 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Icon name="lucide:file-spreadsheet" class="w-10 h-10 text-emerald-500" />
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Download Excel</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-8">
+            Apakah Anda ingin mengunduh data "{{ currentTableLabel }}" dalam format Microsoft Excel (.xlsx)?
+          </p>
+
+          <div class="flex flex-col gap-3">
+            <button @click="downloadExcel"
+              class="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer">
+              <Icon name="lucide:download" class="w-5 h-5" />
+              Download Sekarang
+            </button>
+            <button @click="showDownloadExcelModal = false"
+              class="w-full px-6 py-3 bg-gray-150 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-bold cursor-pointer">
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { availableTables as menuList } from '~/utils/menu';
 
 // Metadata setup
 useHead({
@@ -567,15 +693,17 @@ const tablesList = computed(() => {
     { apiKey: 'menu_config', label: 'Konfigurasi Menu (menu_config)' }
   ];
   
-  const source = dynamicMenuList.value.length > 0 ? dynamicMenuList.value : menuList;
-  
   return [
     ...list,
-    ...source.map(t => ({
+    ...dynamicMenuList.value.map(t => ({
       apiKey: t.nama_sheet,
       label: t.label
     }))
   ];
+});
+
+const currentTableLabel = computed(() => {
+  return tablesList.value.find(t => t.apiKey === selectedTable.value)?.label || selectedTable.value;
 });
 
 // State
@@ -611,6 +739,7 @@ const endIndex = computed(() => {
 // Form Modals State
 const showFormModal = ref(false);
 const isEditMode = ref(false);
+const showDownloadExcelModal = ref(false);
 const form = ref({
   no: null,
   sub_menu: '',
@@ -783,17 +912,33 @@ const openEditModal = (item) => {
 // Submit Add / Edit Form (Untuk mode Manual)
 const submitForm = async () => {
   isSubmitting.value = true;
+
+  // Validation for duplicate sheet names in menu_config
+  if (selectedTable.value === 'menu_config') {
+    const sanitizedName = sanitizeSheetName(form.value.nama_sheet);
+    const isDuplicate = zikirData.value.some(item => 
+      item.nama_sheet.toLowerCase() === sanitizedName.toLowerCase() && 
+      (!isEditMode.value || item.no !== form.value.no)
+    );
+    if (isDuplicate) {
+      triggerAlert(`Nama sheet "${sanitizedName}" sudah digunakan! Silakan gunakan nama sheet lain.`, 'error');
+      isSubmitting.value = false;
+      return;
+    }
+    form.value.nama_sheet = sanitizedName; // Update with sanitized value
+  }
+
   const action = isEditMode.value ? 'update' : 'create';
 
   const payloadItem = selectedTable.value === 'menu_config' 
     ? {
         no: form.value.no,
-        key: isEditMode.value ? (zikirData.value.find(d => d.no === form.value.no)?.key || generateRandomKey()) : generateRandomKey(),
+        key: form.value.nama_sheet.replace(/_/g, '-'),
         nama_sheet: form.value.nama_sheet,
         label: form.value.label,
         description: form.value.description,
         icon: form.value.icon,
-        next: form.value.next
+        next: form.value.next ? form.value.next.toLowerCase().replace(/[\s_]+/g, '-') : ''
       }
     : {
         no: form.value.no,
@@ -1057,8 +1202,139 @@ const deleteItem = async () => {
   }
 };
 
+// Print data
+const printData = () => {
+  const printWindow = window.open('', '_blank');
+  const isMenuConfig = selectedTable.value === 'menu_config';
+  
+  let contentHtml = '';
+  if (isMenuConfig) {
+    contentHtml = `
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left;">
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">No</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">Nama Sheet</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">Label</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">Deskripsi</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">Icon</th>
+            <th style="padding: 10px; border: 1px solid #cbd5e1;">Selanjutnya</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${zikirData.value.map(item => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${item.no}</td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${item.nama_sheet || ''}</td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;"><strong>${item.label || ''}</strong></td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${item.description || ''}</td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${item.icon || ''}</td>
+              <td style="padding: 10px; border: 1px solid #e2e8f0;">${item.next || ''}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } else {
+    contentHtml = zikirData.value.map(item => `
+      ${item.sub_menu ? `<h2 style="margin-top: 30px; color: #059669; border-bottom: 2px solid #059669; padding-bottom: 5px;">${item.sub_menu}</h2>` : ''}
+      <div class="item" style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+        <div style="font-size: 12px; color: #64748b; font-weight: bold; margin-bottom: 5px;">Zikir No. ${item.no}</div>
+        <div class="arab" style="font-size: 24px; direction: rtl; text-align: right; font-family: 'Amiri', 'Traditional Arabic', Arial, sans-serif; line-height: 2; margin-bottom: 10px;">${item.arab}</div>
+        <div class="translation" style="font-size: 15px; color: #334155; line-height: 1.6;">${item.terjemah}</div>
+      </div>
+    `).join('');
+  }
+
+  const html = `
+    <html>
+      <head>
+        <title>${currentTableLabel.value}</title>
+        <style>
+          body { font-family: system-ui, -apple-system, sans-serif; margin: 30px; color: #1e293b; }
+          h1 { color: #0f172a; margin-bottom: 5px; }
+          .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+          @media print {
+            body { margin: 20px; }
+            h2 { page-break-after: avoid; }
+            .item { page-break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Data ${currentTableLabel.value}</h1>
+        <div class="subtitle">Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>
+        ${contentHtml}
+      </body>
+    </html>
+  `;
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.print();
+};
+
+// Download Excel
+const downloadExcel = async () => {
+  const XLSX = await import('xlsx/xlsx.mjs');
+  const isMenuConfig = selectedTable.value === 'menu_config';
+  
+  let data = [];
+  if (isMenuConfig) {
+    data = zikirData.value.map(item => ({
+      No: item.no,
+      'Nama Sheet': item.nama_sheet || '',
+      Label: item.label || '',
+      Deskripsi: item.description || '',
+      Icon: item.icon || '',
+      Selanjutnya: item.next || ''
+    }));
+  } else {
+    data = zikirData.value.map(item => ({
+      No: item.no,
+      'Sub Menu': item.sub_menu || '',
+      Arab: item.arab || '',
+      Terjemah: item.terjemah || ''
+    }));
+  }
+  
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, isMenuConfig ? 'Menu Config' : 'Zikir');
+  XLSX.writeFile(wb, `${currentTableLabel.value}.xlsx`);
+  showDownloadExcelModal.value = false;
+};
+
+const sanitizeSheetName = (val) => {
+  if (!val) return '';
+  return val
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_') // replace any non-alphanumeric character with underscore
+    .replace(/_+/g, '_') // collapse consecutive underscores
+    .replace(/^_+|_+$/g, '') // trim leading/trailing underscores
+    .slice(0, 100);
+};
+
+// Auto-sanitize sheet name on input
+watch(() => form.value.nama_sheet, (newVal) => {
+  if (selectedTable.value === 'menu_config' && newVal) {
+    form.value.nama_sheet = sanitizeSheetName(newVal);
+  }
+});
+
 // Lifecycle mount
 onMounted(async () => {
+  if (import.meta.client) {
+    const cachedMenu = localStorage.getItem('zikir_cache_menu_config');
+    if (cachedMenu) {
+      try {
+        const parsed = JSON.parse(cachedMenu);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          dynamicMenuList.value = parsed;
+        }
+      } catch (e) {}
+    }
+  }
+
   const cachedPassword = sessionStorage.getItem('admin_password');
   if (cachedPassword) {
     try {
